@@ -21,24 +21,19 @@ const data = {
       isActive: true,
     },
     {
-      title: "Clients",
-      url: "/manage/clients",
+      title: "Visitantes",
+      url: "/manage/visitors",
       icon: Users,
     },
     {
-      title: "Events",
+      title: "Exportar Datos",
       url: "/manage/events",
       icon: Calendar,
     },
     {
-      title: "RSVPS",
-      url: "/manage/rsvps",
+      title: "Configuración",
+      url: "/manage/settings",
       icon: CheckSquare,
-    },
-    {
-      title: "Templates",
-      url: "/manage/templates",
-      icon: FileText,
     },
   ],
   // navClouds: [
