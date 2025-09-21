@@ -18,27 +18,27 @@ type Props = {
   queryKeyGetter(): unknown[];
 };
 
-export default function DeleteClientDialog(props: Props) {
+export default function DeleteVisitorDialog(props: Props) {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
       if (!props.itemId)
-        throw new Error("Could not delete client, id was not provided");
+        throw new Error("Could not delete visitor, id was not provided");
 
       return supabase
-        .from("clients")
+        .from("visitors")
         .delete()
         .eq("id", props.itemId)
         .throwOnError();
     },
     async onSuccess() {
       await queryClient.invalidateQueries({ queryKey: props.queryKeyGetter() });
-      toast.success("Client deleted");
+      toast.success("Visitor deleted");
       props.onSuccess?.();
     },
     onError(error) {
-      toast.error("Failed to delete client", {
+      toast.error("Failed to delete visitor", {
         description: error.message,
       });
     },

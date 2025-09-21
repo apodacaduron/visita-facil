@@ -8,26 +8,26 @@ import { SiteHeader } from '@/components/site-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { ClientDialog, ClientsTable, DeleteClientDialog } from '@/features/clients'; // adjust path as needed
-import { Client } from '@/features/clients/components/ClientsTable';
+import { DeleteVisitorDialog, VisitorDialog, VisitorsTable } from '@/features/visitors'; // adjust path as needed
+import { Visitor } from '@/features/visitors/components/VisitorsTable';
 
 export default function Page() {
   const [searchInput, setSearchInput] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState<Client | null>(null);
+  const [currentItem, setCurrentItem] = useState<Visitor | null>(null);
 
   const queryKeyGetter = useCallback(() => {
-    return searchInput ? ["clients", { searchInput }] : ["clients"];
+    return searchInput ? ["visitors", { searchInput }] : ["visitors"];
   }, [searchInput]);
 
-  function openEditDialog(client: Client) {
-    setCurrentItem(client);
+  function openEditDialog(visitor: Visitor) {
+    setCurrentItem(visitor);
     setFormDialogOpen(true);
   }
 
-  function openDeleteDialog(client: Client) {
-    setCurrentItem(client);
+  function openDeleteDialog(visitor: Visitor) {
+    setCurrentItem(visitor);
     setDeleteDialogOpen(true);
   }
 
@@ -57,7 +57,7 @@ export default function Page() {
         <SiteHeader
           breadcrumbs={[
             {
-              label: "Clients",
+              label: "Visitors",
             },
           ]}
         />
@@ -74,7 +74,7 @@ export default function Page() {
                 />
 
                 {/* Create and edit dialog */}
-                <ClientDialog
+                <VisitorDialog
                   onSuccess={() => {
                     setFormDialogOpen(false);
                     setCurrentItem(null);
@@ -92,7 +92,7 @@ export default function Page() {
                 </Button>
               </div>
 
-              <DeleteClientDialog
+              <DeleteVisitorDialog
                 onSuccess={() => {
                   setDeleteDialogOpen(false);
                   setCurrentItem(null);
@@ -106,8 +106,8 @@ export default function Page() {
                 }}
               />
 
-              {/* Clients table */}
-              <ClientsTable
+              {/* Visitors table */}
+              <VisitorsTable
                 onEdit={openEditDialog}
                 onDelete={openDeleteDialog}
                 queryKeyGetter={queryKeyGetter}

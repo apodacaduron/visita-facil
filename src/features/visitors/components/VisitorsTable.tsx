@@ -17,17 +17,17 @@ import {
 
 import { Tables } from '../../../../database.types';
 
-export type Client = Tables<'clients'>
+export type Visitor = Tables<'visitors'>
 
 type Props = {
-  onEdit: (client: Client) => void;
-  onDelete: (client: Client) => void;
+  onEdit: (visitor: Visitor) => void;
+  onDelete: (visitor: Visitor) => void;
   queryKeyGetter(): unknown[];
 };
 
-const columnHelper = createColumnHelper<Client>();
+const columnHelper = createColumnHelper<Visitor>();
 
-export default function ClientsTable(props: Props) {
+export default function VisitorsTable(props: Props) {
   const columns = [
     columnHelper.accessor("name", {
       header: "Name",
@@ -53,7 +53,7 @@ export default function ClientsTable(props: Props) {
     columnHelper.display({
       header: "Actions",
       cell: ({ row }) => {
-        const client = row.original;
+        const visitor = row.original;
 
         return (
           <DropdownMenu>
@@ -68,13 +68,13 @@ export default function ClientsTable(props: Props) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
-              <DropdownMenuItem onClick={() => props.onEdit(client)}>
+              <DropdownMenuItem onClick={() => props.onEdit(visitor)}>
                 Edit
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
-                onClick={() => props.onDelete(client)}
+                onClick={() => props.onDelete(visitor)}
               >
                 Delete
               </DropdownMenuItem>
@@ -90,7 +90,7 @@ export default function ClientsTable(props: Props) {
     queryFn: async ({ queryKey }) => {
       const [, params] = queryKey as [string, { searchInput: string }];
       const query = supabase
-      .from("clients")
+      .from("visitors")
       .select("*")
       .order("created_at", { ascending: false }).throwOnError();
       
@@ -144,7 +144,7 @@ export default function ClientsTable(props: Props) {
                 colSpan={3}
                 className="text-center text-sm text-destructive"
               >
-                Failed to load clients.
+                Failed to load visitors.
               </TableCell>
             </TableRow>
           ) : data && data.length === 0 ? (
@@ -153,7 +153,7 @@ export default function ClientsTable(props: Props) {
                 colSpan={3}
                 className="text-center text-muted-foreground"
               >
-                No clients found.
+                No visitors found.
               </TableCell>
             </TableRow>
           ) : (

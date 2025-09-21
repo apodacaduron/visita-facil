@@ -7,258 +7,230 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.5"
   }
   public: {
     Tables: {
-      clients: {
+      organization_memberships: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string | null
+          role_id: string | null
+          status: Database["public"]["Enums"]["member_status"] | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          role_id?: string | null
+          status?: Database["public"]["Enums"]["member_status"] | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string | null
+          role_id?: string | null
+          status?: Database["public"]["Enums"]["member_status"] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_memberships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_memberships_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_memberships_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_id: string | null
+          role_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_id?: string | null
+          role_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_id?: string | null
+          role_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          status: Database["public"]["Enums"]["user_status"] | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          status?: Database["public"]["Enums"]["user_status"] | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          status?: Database["public"]["Enums"]["user_status"] | null
+        }
+        Relationships: []
+      }
+      visitors: {
         Row: {
           created_at: string
           email: string | null
           id: string
           name: string | null
-          phone: string | null
-          search: string | null
+          organization_id: string | null
+          people_count: number | null
         }
         Insert: {
           created_at?: string
           email?: string | null
           id?: string
           name?: string | null
-          phone?: string | null
-          search?: string | null
+          organization_id?: string | null
+          people_count?: number | null
         }
         Update: {
           created_at?: string
           email?: string | null
           id?: string
           name?: string | null
-          phone?: string | null
-          search?: string | null
-        }
-        Relationships: []
-      }
-      events: {
-        Row: {
-          blocks: Json | null
-          client_id: string | null
-          created_at: string
-          created_by: string | null
-          event_date: string | null
-          event_type: string | null
-          id: string
-          music_url: string | null
-          og_image_url: string | null
-          seo_description: string | null
-          seo_title: string | null
-          slug: string
-          template_id: string | null
-          theme_color: string | null
-          title: string | null
-        }
-        Insert: {
-          blocks?: Json | null
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          event_date?: string | null
-          event_type?: string | null
-          id?: string
-          music_url?: string | null
-          og_image_url?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          slug: string
-          template_id?: string | null
-          theme_color?: string | null
-          title?: string | null
-        }
-        Update: {
-          blocks?: Json | null
-          client_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          event_date?: string | null
-          event_type?: string | null
-          id?: string
-          music_url?: string | null
-          og_image_url?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          slug?: string
-          template_id?: string | null
-          theme_color?: string | null
-          title?: string | null
+          organization_id?: string | null
+          people_count?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "events_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "visitors_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "events_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "templates"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
-      }
-      media: {
-        Row: {
-          bucket: string | null
-          created_at: string
-          event_id: string | null
-          fileName: string | null
-          filePath: string | null
-          id: string
-          publicUrl: string | null
-          template_id: string | null
-          type: string | null
-          uploaded_by: string | null
-        }
-        Insert: {
-          bucket?: string | null
-          created_at?: string
-          event_id?: string | null
-          fileName?: string | null
-          filePath?: string | null
-          id?: string
-          publicUrl?: string | null
-          template_id?: string | null
-          type?: string | null
-          uploaded_by?: string | null
-        }
-        Update: {
-          bucket?: string | null
-          created_at?: string
-          event_id?: string | null
-          fileName?: string | null
-          filePath?: string | null
-          id?: string
-          publicUrl?: string | null
-          template_id?: string | null
-          type?: string | null
-          uploaded_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "media_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "media_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      rsvps: {
-        Row: {
-          created_at: string
-          event_id: string | null
-          id: string
-          message: string | null
-          name: string
-          people_count: number
-          phone: string | null
-          will_attend: boolean
-        }
-        Insert: {
-          created_at?: string
-          event_id?: string | null
-          id?: string
-          message?: string | null
-          name: string
-          people_count: number
-          phone?: string | null
-          will_attend: boolean
-        }
-        Update: {
-          created_at?: string
-          event_id?: string | null
-          id?: string
-          message?: string | null
-          name?: string
-          people_count?: number
-          phone?: string | null
-          will_attend?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "rsvps_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      templates: {
-        Row: {
-          blocks: Json | null
-          created_at: string
-          id: string
-          music_url: string | null
-          name: string
-          og_image_url: string | null
-          search: string | null
-          seo_description: string | null
-          seo_title: string | null
-          slug: string
-          theme_color: string | null
-        }
-        Insert: {
-          blocks?: Json | null
-          created_at?: string
-          id?: string
-          music_url?: string | null
-          name: string
-          og_image_url?: string | null
-          search?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          slug: string
-          theme_color?: string | null
-        }
-        Update: {
-          blocks?: Json | null
-          created_at?: string
-          id?: string
-          music_url?: string | null
-          name?: string
-          og_image_url?: string | null
-          search?: string | null
-          seo_description?: string | null
-          seo_title?: string | null
-          slug?: string
-          theme_color?: string | null
-        }
-        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      generate_slug: {
-        Args: { input: string }
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
-      role: "owner" | "editor" | "viewer"
+      member_status: "active" | "invited" | "inactive"
+      user_status: "active" | "inactive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -386,7 +358,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      role: ["owner", "editor", "viewer"],
+      member_status: ["active", "invited", "inactive"],
+      user_status: ["active", "inactive"],
     },
   },
 } as const

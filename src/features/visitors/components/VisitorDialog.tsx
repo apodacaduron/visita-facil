@@ -17,9 +17,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { DialogProps } from '@radix-ui/react-dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { Client } from './ClientsTable';
+import { Visitor } from './VisitorsTable';
 
-const clientSchema = z.object({
+const visitorSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   email: z.email({ message: "Invalid email address" }).or(z.literal("")),
   phone: z
@@ -29,20 +29,20 @@ const clientSchema = z.object({
     .or(z.literal("")),
 });
 
-type ClientSchema = z.infer<typeof clientSchema>;
+type VisitorSchema = z.infer<typeof visitorSchema>;
 
 type Props = {
   onSuccess?: () => void;
-  item: Client | null;
+  item: Visitor | null;
   dialogProps: DialogProps;
   queryKeyGetter(): unknown[];
 };
 
-export default function ClientForm(props: Props) {
+export default function VisitorForm(props: Props) {
   const queryClient = useQueryClient();
 
-  const form = useForm<ClientSchema>({
-    resolver: zodResolver(clientSchema),
+  const form = useForm<VisitorSchema>({
+    resolver: zodResolver(visitorSchema),
     defaultValues: {
       name: props.item?.name ?? "",
       email: props.item?.email ?? "",
@@ -50,8 +50,8 @@ export default function ClientForm(props: Props) {
     },
   });
   const createMutation = useMutation({
-    mutationFn: async (data: ClientSchema) => {
-      return supabase.from("clients").insert(data).throwOnError();
+    mutationFn: async (data: VisitorSchema) => {
+      return supabase.from("visitors").insert(data).throwOnError();
     },
     async onSuccess(_, variables) {
       await queryClient.invalidateQueries({ queryKey: props.queryKeyGetter() });
@@ -62,37 +62,37 @@ export default function ClientForm(props: Props) {
       props.onSuccess?.();
     },
     onError(error) {
-      toast.error("Failed to add client", {
+      toast.error("Failed to add visitor", {
         description: error.message,
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: ClientSchema) => {
+    mutationFn: async (data: VisitorSchema) => {
       if (!props.item?.id)
-        throw new Error("Could not update client, id was not provided");
+        throw new Error("Could not update visitor, id was not provided");
 
       return supabase
-        .from("clients")
+        .from("visitors")
         .update(data)
         .eq("id", props.item.id)
         .throwOnError();
     },
     async onSuccess() {
-      await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      await queryClient.invalidateQueries({ queryKey: ["visitors"] });
       toast.success("Client updated");
       form.reset();
       props.onSuccess?.();
     },
     onError(error) {
-      toast.error("Failed to update client", {
+      toast.error("Failed to update visitor", {
         description: error.message,
       });
     },
   });
 
-  async function onSubmit(data: ClientSchema) {
+  async function onSubmit(data: VisitorSchema) {
     const isUpdating = Boolean(props.item?.id);
 
     if (isUpdating) {
@@ -115,7 +115,7 @@ export default function ClientForm(props: Props) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {props.item?.id ? "Update client" : "Add new client"}
+            {props.item?.id ? "Update visitor" : "Add new visitor"}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -146,7 +146,7 @@ export default function ClientForm(props: Props) {
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="client@example.com"
+                      placeholder="visitor@example.com"
                       {...field}
                     />
                   </FormControl>
@@ -162,7 +162,7 @@ export default function ClientForm(props: Props) {
                 <FormItem>
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="Client phone" {...field} />
+                    <Input type="tel" placeholder="Visitor phone" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

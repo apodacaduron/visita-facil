@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "check": "next lint && tsc --noEmit",
-    "generate:types": "npx supabase gen types typescript --project-id \"lwotpjzdnsbqfetmucxp\" --schema public > database.types.ts"
+    "generate:types": "npx supabase gen types typescript --project-id \"dwwevbnyhcmiuayrwvdg\" --schema public > database.types.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
