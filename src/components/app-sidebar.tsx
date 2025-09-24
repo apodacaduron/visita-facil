@@ -1,6 +1,7 @@
 "use client";
 
 import { File, LayoutDashboard, Settings, Users } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import { NavMain } from '@/components/nav-main';
@@ -12,116 +13,35 @@ import {
 import { useAuth } from '@/context/AuthProvider';
 import { IconInnerShadowTop } from '@tabler/icons-react';
 
-const data = {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const params = useParams();
+  const authCtx = useAuth();
+
+  const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/manage/dashboard",
+      url: `/org/${params.organizationId}/dashboard`,
       icon: LayoutDashboard,
       isActive: true,
     },
     {
       title: "Visitantes",
-      url: "/manage/visitors",
+      url: `/org/${params.organizationId}/visitors`,
       icon: Users,
     },
     {
       title: "Exportar Datos",
-      url: "/manage/reports",
+      url: `/org/${params.organizationId}/reports`,
       icon: File,
     },
     {
       title: "Configuración",
-      url: "/manage/settings",
+      url: `/org/${params.organizationId}/settings`,
       icon: Settings,
     },
   ],
-  // navClouds: [
-  //   {
-  //     title: "Capture",
-  //     icon: IconCamera,
-  //     isActive: true,
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "Proposal",
-  //     icon: IconFileDescription,
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "Prompts",
-  //     icon: IconFileAi,
-  //     url: "#",
-  //     items: [
-  //       {
-  //         title: "Active Proposals",
-  //         url: "#",
-  //       },
-  //       {
-  //         title: "Archived",
-  //         url: "#",
-  //       },
-  //     ],
-  //   },
-  // ],
-  // navSecondary: [
-  //   {
-  //     title: "Settings",
-  //     url: "#",
-  //     icon: IconSettings,
-  //   },
-  //   {
-  //     title: "Get Help",
-  //     url: "#",
-  //     icon: IconHelp,
-  //   },
-  //   {
-  //     title: "Search",
-  //     url: "#",
-  //     icon: IconSearch,
-  //   },
-  // ],
-  // documents: [
-  //   {
-  //     name: "Data Library",
-  //     url: "#",
-  //     icon: IconDatabase,
-  //   },
-  //   {
-  //     name: "Reports",
-  //     url: "#",
-  //     icon: IconReport,
-  //   },
-  //   {
-  //     name: "Word Assistant",
-  //     url: "#",
-  //     icon: IconFileWord,
-  //   },
-  // ],
 };
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const authCtx = useAuth();
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>

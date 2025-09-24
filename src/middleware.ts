@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 
 import { createServerClient } from '@supabase/ssr';
 
-import type { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+  const res = NextResponse.next();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,31 +14,59 @@ export async function middleware(req: NextRequest) {
       cookies: {
         getAll: () => req.cookies.getAll(),
         setAll: () => {
-          // no-op or implement if needed
+          /* no-op for now */
         },
       },
     }
-  )
+  );
 
-  const { data } = await supabase.auth.getSession()
+  const { data } = await supabase.auth.getSession();
+  const session = data.session;
 
-  // Redirect unauthenticated users trying to access protected routes to login
-  if (!data.session && !req.nextUrl.pathname.startsWith('/login')) {
-    const loginUrl = req.nextUrl.clone()
-    loginUrl.pathname = '/login'
-    // return NextResponse.redirect(loginUrl)
+  const url = req.nextUrl.clone();
+
+  // -------------------------
+  // Unauthenticated user
+  // -------------------------
+  if (!session) {
+    // Redirect to login if accessing protected routes
+    if (!req.nextUrl.pathname.startsWith('/login')) {
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+    return res; // let login page load
   }
 
-  // Redirect logged-in users away from login page (to dashboard)
-  if (data.session && req.nextUrl.pathname.startsWith('/login')) {
-    const dashboardUrl = req.nextUrl.clone()
-    dashboardUrl.pathname = '/manage/dashboard'
-    // return NextResponse.redirect(dashboardUrl)
+  // -------------------------
+  // Authenticated user
+  // -------------------------
+  const userId = session.user?.id;
+
+  // Check if user has an organization
+  const { data: orgData } = await supabase
+    .from('organizations')
+    .select('id')
+    .eq('created_by', userId)
+    .single();
+
+  const hasOrganization = Boolean(orgData?.id);
+
+  // Redirect users without org to org creation page
+  if (!hasOrganization && !req.nextUrl.pathname.startsWith('/org/create')) {
+    url.pathname = '/org/create';
+    return NextResponse.redirect(url);
   }
 
-  return res
+  // Redirect logged-in users away from login page
+  if (req.nextUrl.pathname.startsWith('/login')) {
+    const dashboardPath = hasOrganization ? `/org/${orgData?.id}/dashboard` : '/org/create';
+    url.pathname = dashboardPath;
+    return NextResponse.redirect(url);
+  }
+
+  return res;
 }
 
 export const config = {
-  matcher: ['/manage/:path*', '/login'], // protect these routes + login for redirect
-}
+  matcher: ['/org/:path*', '/login'], // protect these routes + login for redirect
+};

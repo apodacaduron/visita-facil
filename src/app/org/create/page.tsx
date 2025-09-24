@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2Icon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
@@ -21,6 +22,7 @@ const organizationSchema = z.object({
 type OrganizationSchema = z.infer<typeof organizationSchema>;
 
 export default function CreateOrganizationPage() {
+    const router = useRouter();
     const queryClient = useQueryClient();
 
     const form = useForm<OrganizationSchema>({
@@ -32,14 +34,17 @@ export default function CreateOrganizationPage() {
   
     const createMutation = useMutation({
     mutationFn: async (data: OrganizationSchema) => {
-      return supabase.from("organizations").insert(data).throwOnError();
+      return supabase.from("organizations").insert(data).select().single().throwOnError();
     },
-    async onSuccess(_, variables) {
+    async onSuccess(response, variables) {
       await queryClient.invalidateQueries({ queryKey: ['organizations'] });
       toast.success("Organization added!", {
         description: variables.name,
       });
       form.reset();
+
+      const organizationId = response.data.id
+      router.push(`/org/${organizationId}/dashboard`)
     },
     onError(error) {
       toast.error("Failed to add visitor", {
@@ -76,7 +81,6 @@ export default function CreateOrganizationPage() {
                         {...form.register("name", { required: "Nombre es requerido" })}
                       />
                     </div>
-                    {JSON.stringify(form.formState.isSubmitting)}
                     <Button
                       type="submit"
                       className="w-full mt-4"
