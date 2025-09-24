@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, CheckSquare, FileText, LayoutDashboard, Users } from 'lucide-react';
+import { File, LayoutDashboard, Settings, Users } from 'lucide-react';
 import * as React from 'react';
 
 import { NavMain } from '@/components/nav-main';
@@ -27,13 +27,13 @@ const data = {
     },
     {
       title: "Exportar Datos",
-      url: "/manage/events",
-      icon: Calendar,
+      url: "/manage/reports",
+      icon: File,
     },
     {
       title: "Configuración",
       url: "/manage/settings",
-      icon: CheckSquare,
+      icon: Settings,
     },
   ],
   // navClouds: [

@@ -22,11 +22,8 @@ import { Visitor } from './VisitorsTable';
 const visitorSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   email: z.email({ message: "Invalid email address" }).or(z.literal("")),
-  phone: z
-    .string()
-    .min(10, { message: "Phone number must be at least 10 digits" })
-    .regex(/^\d+$/, { message: "Phone number must contain only digits" })
-    .or(z.literal("")),
+  people_count: z
+    .int().nullable(),
 });
 
 type VisitorSchema = z.infer<typeof visitorSchema>;
@@ -46,7 +43,7 @@ export default function VisitorForm(props: Props) {
     defaultValues: {
       name: props.item?.name ?? "",
       email: props.item?.email ?? "",
-      phone: props.item?.phone ?? "",
+      people_count: props.item?.people_count || null,
     },
   });
   const createMutation = useMutation({
@@ -55,7 +52,7 @@ export default function VisitorForm(props: Props) {
     },
     async onSuccess(_, variables) {
       await queryClient.invalidateQueries({ queryKey: props.queryKeyGetter() });
-      toast.success("Client added!", {
+      toast.success("Visitor added!", {
         description: variables.name,
       });
       form.reset();
@@ -106,7 +103,6 @@ export default function VisitorForm(props: Props) {
     form.reset({
       name: props.item?.name ?? "",
       email: props.item?.email ?? "",
-      phone: props.item?.phone ?? "",
     });
   }, [props.item, form]);
 
@@ -157,12 +153,12 @@ export default function VisitorForm(props: Props) {
 
             <FormField
               control={form.control}
-              name="phone"
+              name="people_count"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone</FormLabel>
+                  <FormLabel>People count</FormLabel>
                   <FormControl>
-                    <Input type="tel" placeholder="Visitor phone" {...field} />
+                    <Input type="number" placeholder="Cantidad de personas" {...field} value={field.value || undefined} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

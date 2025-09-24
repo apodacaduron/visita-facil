@@ -37,10 +37,6 @@ export default function VisitorsTable(props: Props) {
       header: "Email",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("phone", {
-      header: "Phone",
-      cell: (info) => info.getValue(),
-    }),
     columnHelper.accessor("created_at", {
       header: "Created At",
       cell: (info) =>
