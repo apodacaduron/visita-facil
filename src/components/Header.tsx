@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
 
 const Header = () => {
@@ -27,12 +29,11 @@ const Header = () => {
         </nav>
 
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm">
-            Sign In
-          </Button>
-          <Button size="sm" className="bg-primary hover:bg-primary-hover text-primary-foreground">
-            Start Free
-          </Button>
+          <Link href="/login">
+            <Button variant="ghost" size="sm">
+              Sign In
+            </Button>
+          </Link>
         </div>
       </div>
     </header>

@@ -47,7 +47,7 @@ export async function middleware(req: NextRequest) {
     .from('organizations')
     .select('id')
     .eq('created_by', userId)
-    .single();
+    .limit(1).single();
 
   const hasOrganization = Boolean(orgData?.id);
 
