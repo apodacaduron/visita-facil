@@ -1,5 +1,5 @@
 import { ChevronsUpDown, Plus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import {
@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 
 export function TeamSwitcher() {
   const router = useRouter();
+  const params = useParams();
   const { isMobile } = useSidebar();
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
   const [activeTeam, setActiveTeam] = React.useState<any>(null);
@@ -35,7 +36,7 @@ export function TeamSwitcher() {
   // Update active team when data loads
   React.useEffect(() => {
     if (organizationsQuery.data?.data?.length) {
-      setActiveTeam(organizationsQuery.data.data[0]);
+      setActiveTeam(organizationsQuery.data.data.find(org => org.id === params.organizationId));
     } else {
       setActiveTeam(null);
     }
