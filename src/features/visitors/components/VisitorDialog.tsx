@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2Icon } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -20,10 +21,16 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Visitor } from './VisitorsTable';
 
 const visitorSchema = z.object({
-  name: z.string().min(1, { message: "Name is required" }),
-  email: z.email({ message: "Invalid email address" }).or(z.literal("")),
-  people_count: z
-    .int().nullable(),
+  name: z.string().min(1, { message: "El nombre es obligatorio" }),
+  email: z
+    .string()
+    .email({ message: "Correo electrónico inválido" })
+    .or(z.literal("")),
+  people_count: z.number().int().nullable(),
+  city: z.string().nullable(),
+  visit_date: z
+    .string()
+    .min(1, { message: "La fecha de visita es obligatoria" }),
 });
 
 type VisitorSchema = z.infer<typeof visitorSchema>;
@@ -36,6 +43,7 @@ type Props = {
 };
 
 export default function VisitorForm(props: Props) {
+  const params = useParams();
   const queryClient = useQueryClient();
 
   const form = useForm<VisitorSchema>({
@@ -43,23 +51,37 @@ export default function VisitorForm(props: Props) {
     defaultValues: {
       name: props.item?.name ?? "",
       email: props.item?.email ?? "",
-      people_count: props.item?.people_count || null,
+      people_count: props.item?.people_count ?? 1, // default to 1
+      city: props.item?.city ?? "", // default to empty string
+      visit_date: props.item?.visit_date
+        ? new Date(props.item.visit_date).toISOString().slice(0, 16) // for datetime-local input
+        : new Date().toISOString().slice(0, 16), // default to now
     },
   });
+
   const createMutation = useMutation({
     mutationFn: async (data: VisitorSchema) => {
-      return supabase.from("visitors").insert(data).throwOnError();
+      const organization_id = params.organizationId?.toString();
+      if (!organization_id)
+        throw new Error(
+          "Organization id not provided, could not create new visitor"
+        );
+
+      return supabase.from("visitors").insert({
+        ...data,
+        organization_id,
+      });
     },
     async onSuccess(_, variables) {
       await queryClient.invalidateQueries({ queryKey: props.queryKeyGetter() });
-      toast.success("Visitor added!", {
+      toast.success("¡Visitante agregado!", {
         description: variables.name,
       });
       form.reset();
       props.onSuccess?.();
     },
     onError(error) {
-      toast.error("Failed to add visitor", {
+      toast.error("No se pudo agregar al visitante", {
         description: error.message,
       });
     },
@@ -68,7 +90,9 @@ export default function VisitorForm(props: Props) {
   const updateMutation = useMutation({
     mutationFn: async (data: VisitorSchema) => {
       if (!props.item?.id)
-        throw new Error("Could not update visitor, id was not provided");
+        throw new Error(
+          "No se pudo actualizar el visitante, no se proporcionó un ID"
+        );
 
       return supabase
         .from("visitors")
@@ -78,12 +102,12 @@ export default function VisitorForm(props: Props) {
     },
     async onSuccess() {
       await queryClient.invalidateQueries({ queryKey: ["visitors"] });
-      toast.success("Client updated");
+      toast.success("Visitante actualizado");
       form.reset();
       props.onSuccess?.();
     },
     onError(error) {
-      toast.error("Failed to update visitor", {
+      toast.error("No se pudo actualizar al visitante", {
         description: error.message,
       });
     },
@@ -103,6 +127,11 @@ export default function VisitorForm(props: Props) {
     form.reset({
       name: props.item?.name ?? "",
       email: props.item?.email ?? "",
+      people_count: props.item?.people_count ?? 1,
+      city: props.item?.city ?? "",
+      visit_date: props.item?.visit_date
+        ? new Date(props.item.visit_date).toISOString().slice(0, 16)
+        : new Date().toISOString().slice(0, 16),
     });
   }, [props.item, form]);
 
@@ -111,7 +140,9 @@ export default function VisitorForm(props: Props) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {props.item?.id ? "Update visitor" : "Add new visitor"}
+            {props.item?.id
+              ? "Actualizar visitante"
+              : "Agregar nuevo visitante"}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -124,9 +155,11 @@ export default function VisitorForm(props: Props) {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>
+                    Nombre<span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Client name" {...field} />
+                    <Input placeholder="Nombre del visitante" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -138,11 +171,11 @@ export default function VisitorForm(props: Props) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Correo electrónico (Opcional)</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="visitor@example.com"
+                      placeholder="visitante@ejemplo.com"
                       {...field}
                     />
                   </FormControl>
@@ -156,9 +189,56 @@ export default function VisitorForm(props: Props) {
               name="people_count"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>People count</FormLabel>
+                  <FormLabel>
+                    Cantidad de personas<span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Cantidad de personas" {...field} value={field.value || undefined} />
+                    <Input
+                      type="number"
+                      placeholder="Cantidad de personas"
+                      {...field}
+                      value={field.value ?? ""} // always a string, never undefined
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === "" ? null : Number(e.target.value)
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ciudad</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ciudad" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="visit_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Fecha de visita<span className="text-red-500">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="datetime-local"
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,8 +250,10 @@ export default function VisitorForm(props: Props) {
               className="w-full mt-4"
               disabled={form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting && <Loader2Icon className="animate-spin" />}
-              Save
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
+              Guardar
             </Button>
           </form>
         </Form>

@@ -14,29 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
-      organization_memberships: {
+      audit_logs: {
         Row: {
-          created_at: string
+          action: string
+          created_at: string | null
+          details: Json | null
           id: string
           organization_id: string | null
-          role_id: string | null
-          status: Database["public"]["Enums"]["member_status"] | null
           user_id: string | null
         }
         Insert: {
-          created_at?: string
+          action: string
+          created_at?: string | null
+          details?: Json | null
           id?: string
           organization_id?: string | null
-          role_id?: string | null
-          status?: Database["public"]["Enums"]["member_status"] | null
           user_id?: string | null
         }
         Update: {
-          created_at?: string
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          organization_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_memberships: {
+        Row: {
+          created_at: string | null
+          id: string
+          organization_id: string | null
+          role_id: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
           id?: string
           organization_id?: string | null
           role_id?: string | null
-          status?: Database["public"]["Enums"]["member_status"] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          organization_id?: string | null
+          role_id?: string | null
+          status?: string | null
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -65,61 +110,78 @@ export type Database = {
       }
       organizations: {
         Row: {
-          created_at: string
+          created_at: string | null
+          created_by: string | null
           description: string | null
           id: string
-          name: string | null
+          name: string
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
-          name?: string | null
+          name: string
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
+          created_by?: string | null
           description?: string | null
           id?: string
-          name?: string | null
+          name?: string
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "organizations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permissions: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string | null
           id: string
-          name: string | null
+          name: string
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
-          name?: string | null
+          name: string
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
-          name?: string | null
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       role_permissions: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
           permission_id: string | null
           role_id: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           permission_id?: string | null
           role_id?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
           permission_id?: string | null
           role_id?: string | null
@@ -136,80 +198,175 @@ export type Database = {
             foreignKeyName: "role_permissions_role_id_fkey"
             columns: ["role_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "roles"
             referencedColumns: ["id"]
           },
         ]
       }
       roles: {
         Row: {
-          created_at: string
+          created_at: string | null
           description: string | null
           id: string
           name: string
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           name: string
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           description?: string | null
           id?: string
           name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       users: {
         Row: {
-          created_at: string
+          created_at: string | null
           email: string
           id: string
           name: string
-          status: Database["public"]["Enums"]["user_status"] | null
+          status: string | null
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           email: string
           id?: string
           name: string
-          status?: Database["public"]["Enums"]["user_status"] | null
+          status?: string | null
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           email?: string
           id?: string
           name?: string
-          status?: Database["public"]["Enums"]["user_status"] | null
+          status?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
-      visitors: {
+      visitor_field_values: {
         Row: {
-          created_at: string
-          email: string | null
+          created_at: string | null
+          field_id: string | null
           id: string
-          name: string | null
-          organization_id: string | null
-          people_count: number | null
+          updated_at: string | null
+          value: string | null
+          visitor_id: string | null
         }
         Insert: {
-          created_at?: string
-          email?: string | null
+          created_at?: string | null
+          field_id?: string | null
           id?: string
-          name?: string | null
-          organization_id?: string | null
-          people_count?: number | null
+          updated_at?: string | null
+          value?: string | null
+          visitor_id?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
+          field_id?: string | null
+          id?: string
+          updated_at?: string | null
+          value?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_field_values_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "visitor_fields"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_field_values_visitor_id_fkey"
+            columns: ["visitor_id"]
+            isOneToOne: false
+            referencedRelation: "visitors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visitor_fields: {
+        Row: {
+          created_at: string | null
+          field_type: string
+          id: string
+          is_required: boolean | null
+          name: string
+          organization_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          field_type: string
+          id?: string
+          is_required?: boolean | null
+          name: string
+          organization_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          field_type?: string
+          id?: string
+          is_required?: boolean | null
+          name?: string
+          organization_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_fields_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visitors: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          organization_id: string | null
+          people_count: number | null
+          updated_at: string | null
+          visit_date: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
           email?: string | null
           id?: string
-          name?: string | null
+          name: string
           organization_id?: string | null
           people_count?: number | null
+          updated_at?: string | null
+          visit_date?: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          organization_id?: string | null
+          people_count?: number | null
+          updated_at?: string | null
+          visit_date?: string
         }
         Relationships: [
           {

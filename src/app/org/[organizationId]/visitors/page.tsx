@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon } from 'lucide-react';
+import { FileOutput, PlusIcon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 import { AppSidebar } from '@/components/app-sidebar';
@@ -64,6 +64,13 @@ export default function Page() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+              <div className="flex items-center justify-between">
+                <div><div className='font-medium text-xl'>Visitors</div><div className='text-muted-foreground text-sm'>Manage and view all visitor registrations</div></div>
+                <Button disabled>
+                  <FileOutput className="size-4" />
+                  Export selected
+                </Button>
+              </div>
               <div className="flex justify-between">
                 <Input
                   value={searchInput}
