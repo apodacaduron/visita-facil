@@ -1,4 +1,5 @@
 import { ChevronsUpDown, Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import {
@@ -13,6 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
 export function TeamSwitcher() {
+  const router = useRouter();
   const { isMobile } = useSidebar();
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
   const [activeTeam, setActiveTeam] = React.useState<any>(null);
@@ -41,7 +43,7 @@ export function TeamSwitcher() {
 
   function selectTeam(team: any) {
     setActiveTeam(team);
-    // router.push(`/org/${team.id}/dashboard`) // if needed
+    router.push(`/org/${team.id}/dashboard`);
   }
 
   const loading = organizationsQuery.isLoading;
@@ -60,7 +62,9 @@ export function TeamSwitcher() {
                   {loading ? (
                     <div className="h-4 w-24 bg-gray-300 rounded animate-pulse" />
                   ) : (
-                    <span className="truncate font-medium">{activeTeam?.name}</span>
+                    <span className="truncate font-medium">
+                      {activeTeam?.name}
+                    </span>
                   )}
                 </div>
                 <ChevronsUpDown className="ml-auto" />
@@ -73,7 +77,9 @@ export function TeamSwitcher() {
               side={isMobile ? "bottom" : "right"}
               sideOffset={4}
             >
-              <DropdownMenuLabel className="text-muted-foreground text-xs">Teams</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-muted-foreground text-xs">
+                Teams
+              </DropdownMenuLabel>
 
               {loading
                 ? Array.from({ length: 3 }).map((_, i) => (
@@ -102,7 +108,9 @@ export function TeamSwitcher() {
                 <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
                   <Plus className="size-4" />
                 </div>
-                <div className="text-muted-foreground font-medium">Add team</div>
+                <div className="text-muted-foreground font-medium">
+                  Add team
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
