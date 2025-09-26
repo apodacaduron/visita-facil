@@ -1,5 +1,7 @@
 "use client";
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import { Loader2Icon } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useEffect } from 'react';
@@ -20,6 +22,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { Visitor } from './VisitorsTable';
 
+dayjs.extend(utc)
 const visitorSchema = z.object({
   name: z.string().min(1, { message: "El nombre es obligatorio" }),
   email: z
@@ -53,9 +56,9 @@ export default function VisitorForm(props: Props) {
       email: props.item?.email ?? "",
       people_count: props.item?.people_count ?? 1, // default to 1
       city: props.item?.city ?? "", // default to empty string
-      visit_date: props.item?.visit_date
-        ? new Date(props.item.visit_date).toISOString().slice(0, 16) // for datetime-local input
-        : new Date().toISOString().slice(0, 16), // default to now
+      visit_date: dayjs(props.item?.visit_date ?? new Date()).format(
+        "YYYY-MM-DDTHH:mm"
+      ),
     },
   });
 
@@ -69,6 +72,9 @@ export default function VisitorForm(props: Props) {
 
       return supabase.from("visitors").insert({
         ...data,
+        visit_date: dayjs(data.visit_date)
+          .utc() // interpret as local, convert to UTC
+          .toISOString(),
         organization_id,
       });
     },
@@ -89,6 +95,11 @@ export default function VisitorForm(props: Props) {
 
   const updateMutation = useMutation({
     mutationFn: async (data: VisitorSchema) => {
+      const organization_id = params.organizationId?.toString();
+      if (!organization_id)
+        throw new Error(
+          "Organization id not provided, could not create new visitor"
+        );
       if (!props.item?.id)
         throw new Error(
           "No se pudo actualizar el visitante, no se proporcionó un ID"
@@ -96,7 +107,13 @@ export default function VisitorForm(props: Props) {
 
       return supabase
         .from("visitors")
-        .update(data)
+        .update({
+          ...data,
+          visit_date: dayjs(data.visit_date)
+            .utc() // interpret as local, convert to UTC
+            .toISOString(),
+          organization_id,
+        })
         .eq("id", props.item.id)
         .throwOnError();
     },
@@ -129,9 +146,9 @@ export default function VisitorForm(props: Props) {
       email: props.item?.email ?? "",
       people_count: props.item?.people_count ?? 1,
       city: props.item?.city ?? "",
-      visit_date: props.item?.visit_date
-        ? new Date(props.item.visit_date).toISOString().slice(0, 16)
-        : new Date().toISOString().slice(0, 16),
+      visit_date: dayjs(props.item?.visit_date ?? new Date()).format(
+        "YYYY-MM-DDTHH:mm"
+      ),
     });
   }, [props.item, form]);
 
@@ -217,7 +234,11 @@ export default function VisitorForm(props: Props) {
                 <FormItem>
                   <FormLabel>Ciudad</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ciudad" {...field} />
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
