@@ -1,52 +1,14 @@
 "use client";
 
-import { FileOutput, PlusIcon } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { Settings, Trash2 } from 'lucide-react';
 
 import { AppSidebar } from '@/components/app-sidebar';
 import { SiteHeader } from '@/components/site-header';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { DeleteVisitorDialog, VisitorDialog, VisitorsTable } from '@/features/visitors'; // adjust path as needed
-import { Visitor } from '@/features/visitors/components/VisitorsTable';
 
 export default function Page() {
-  const params = useParams();
-  const [searchInput, setSearchInput] = useState("");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState<Visitor | null>(null);
-
-  const queryKeyGetter = useCallback(() => {
-    const organizationId = params.organizationId?.toString();
-
-    return searchInput ? ["visitors", { searchInput, organizationId }] : ["visitors", { organizationId }];
-  }, [searchInput]);
-
-  function openEditDialog(visitor: Visitor) {
-    setCurrentItem(visitor);
-    setFormDialogOpen(true);
-  }
-
-  function openDeleteDialog(visitor: Visitor) {
-    setCurrentItem(visitor);
-    setDeleteDialogOpen(true);
-  }
-
-  function handleFormDialogChange(open: boolean) {
-    setFormDialogOpen(open);
-
-    if (!open) setCurrentItem(null);
-  }
-
-  function handleDeleteDialogChange(open: boolean) {
-    setDeleteDialogOpen(open);
-
-    if (!open) setCurrentItem(null);
-  }
-
   return (
     <SidebarProvider
       style={
@@ -61,69 +23,77 @@ export default function Page() {
         <SiteHeader
           breadcrumbs={[
             {
-              label: "Visitors",
+              label: "Settings",
             },
           ]}
         />
         <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
-              <div className="flex items-center justify-between">
-                <div><div className='font-medium text-xl'>Configuración</div><div className='text-muted-foreground text-sm'>Configure your visitor registration system</div></div>
-                <Button disabled>
-                  <FileOutput className="size-4" />
-                  Export selected
-                </Button>
-              </div>
-              <div className="flex justify-between">
-                <Input
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Search..."
-                  className="max-w-64"
-                  type="search"
-                />
-
-                {/* Create and edit dialog */}
-                <VisitorDialog
-                  onSuccess={() => {
-                    setFormDialogOpen(false);
-                    setCurrentItem(null);
-                  }}
-                  item={currentItem}
-                  queryKeyGetter={queryKeyGetter}
-                  dialogProps={{
-                    open: formDialogOpen,
-                    onOpenChange: handleFormDialogChange,
-                  }}
-                />
-                <Button onClick={() => setFormDialogOpen(true)}>
-                  <PlusIcon className="size-4" />
-                  Create
-                </Button>
-              </div>
-
-              <DeleteVisitorDialog
-                onSuccess={() => {
-                  setDeleteDialogOpen(false);
-                  setCurrentItem(null);
-                }}
-                queryKeyGetter={queryKeyGetter}
-                itemId={currentItem?.id}
-                itemName={currentItem?.name}
-                dialogProps={{
-                  open: deleteDialogOpen,
-                  onOpenChange: handleDeleteDialogChange,
-                }}
-              />
-
-              {/* Visitors table */}
-              <VisitorsTable
-                onEdit={openEditDialog}
-                onDelete={openDeleteDialog}
-                queryKeyGetter={queryKeyGetter}
-              />
+          <div className="flex flex-col gap-6 p-6">
+            {/* Page Title */}
+            <div>
+              <h1 className="text-xl font-semibold">Settings</h1>
+              <p className="text-sm text-muted-foreground">
+                Configure your visitor registration system
+              </p>
             </div>
+
+            {/* General Settings */}
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2">
+                <Settings className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>General Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-medium">Organization Name</p>
+                    <p className="text-sm text-muted-foreground">
+                      Museum of Natural History
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Time Zone</p>
+                    <p className="text-sm text-muted-foreground">
+                      UTC-5 (Eastern Time)
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Default Language</p>
+                    <p className="text-sm text-muted-foreground">English</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Data Retention</p>
+                    <p className="text-sm text-muted-foreground">12 months</p>
+                  </div>
+                </div>
+                <div className="flex justify-end border-t pt-4">
+                  <Button>Save Settings</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Danger Zone */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Danger Zone</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2 rounded-md border border-red-200 bg-red-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-red-600">
+                      Delete Account
+                    </p>
+                    <p className="text-sm text-red-500">
+                      Permanently delete your account and all associated data
+                    </p>
+                  </div>
+                  <Button variant="destructive" className="mt-2 sm:mt-0">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Account
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </SidebarInset>
