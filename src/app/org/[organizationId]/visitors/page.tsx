@@ -1,6 +1,7 @@
 "use client";
 
 import { FileOutput, PlusIcon } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
 import { AppSidebar } from '@/components/app-sidebar';
@@ -12,13 +13,16 @@ import { DeleteVisitorDialog, VisitorDialog, VisitorsTable } from '@/features/vi
 import { Visitor } from '@/features/visitors/components/VisitorsTable';
 
 export default function Page() {
+  const params = useParams();
   const [searchInput, setSearchInput] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<Visitor | null>(null);
 
   const queryKeyGetter = useCallback(() => {
-    return searchInput ? ["visitors", { searchInput }] : ["visitors"];
+    const organizationId = params.organizationId?.toString();
+
+    return searchInput ? ["visitors", { searchInput, organizationId }] : ["visitors", { organizationId }];
   }, [searchInput]);
 
   function openEditDialog(visitor: Visitor) {

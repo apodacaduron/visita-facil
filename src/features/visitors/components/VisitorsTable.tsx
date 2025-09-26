@@ -1,5 +1,7 @@
 "use client";
 
+import { useParams } from 'next/navigation';
+
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger
@@ -17,7 +19,7 @@ import {
 
 import { Tables } from '../../../../database.types';
 
-export type Visitor = Tables<'visitors'>
+export type Visitor = Tables<"visitors">;
 
 type Props = {
   onEdit: (visitor: Visitor) => void;
@@ -28,23 +30,50 @@ type Props = {
 const columnHelper = createColumnHelper<Visitor>();
 
 export default function VisitorsTable(props: Props) {
+  const params = useParams();
+
   const columns = [
     columnHelper.accessor("name", {
-      header: "Name",
+      header: "Nombre",
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor("email", {
-      header: "Email",
+      header: "Correo",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("created_at", {
-      header: "Created At",
+    columnHelper.accessor("people_count", {
+      header: "Personas",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor("city", {
+      header: "Ciudad",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor("visit_date", {
+      header: "Fecha de visita",
       cell: (info) =>
-        new Date(info.getValue()).toLocaleDateString("en-US", {
+        new Date(info.getValue()).toLocaleDateString("es-MX", {
           year: "numeric",
           month: "short",
           day: "numeric",
+          hour: "numeric",
+          minute: "numeric",
         }),
+    }),
+    columnHelper.accessor("created_at", {
+      header: "Creado el",
+      cell: (info) => {
+        const createdAt = info.getValue();
+        if (!createdAt) return '-';
+
+        return new Date(createdAt).toLocaleDateString("es-MX", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "numeric",
+        });
+      },
     }),
     columnHelper.display({
       header: "Actions",
@@ -84,19 +113,28 @@ export default function VisitorsTable(props: Props) {
   const { data, isLoading, isError } = useQuery({
     queryKey: props.queryKeyGetter(),
     queryFn: async ({ queryKey }) => {
-      const [, params] = queryKey as [string, { searchInput: string }];
+      const [, parameters] = queryKey as [string, { searchInput: string }];
+      const organizationId = params.organizationId?.toString();
+      if (!organizationId)
+        throw new Error(
+          "Organization id not provided, could not fetch visitors"
+        );
+
       const query = supabase
-      .from("visitors")
-      .select("*")
-      .order("created_at", { ascending: false }).throwOnError();
-      
-      if (params?.searchInput) {
-        query.ilike("search", `%${params.searchInput}%`);
+        .from("visitors")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .eq("organization_id", organizationId)
+        .throwOnError();
+
+      if (parameters?.searchInput) {
+        query.ilike("search", `%${parameters.searchInput}%`);
       }
-      
+
       const { data } = await query;
       return data ?? [];
     },
+    throwOnError: true,
   });
 
   const table = useReactTable({

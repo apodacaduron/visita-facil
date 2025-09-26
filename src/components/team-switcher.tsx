@@ -1,5 +1,7 @@
+"use client";
+
 import { ChevronsUpDown, Plus } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
 import {
@@ -13,7 +15,11 @@ import CreateOrganizationDialog from '@/features/organizations/components/Create
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
+const STORAGE_KEY = "activeTeamId";
+
 export function TeamSwitcher() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const params = useParams();
   const { isMobile } = useSidebar();
@@ -33,18 +39,42 @@ export function TeamSwitcher() {
     },
   });
 
-  // Update active team when data loads
+  // Restore active team from URL param or localStorage
   React.useEffect(() => {
     if (organizationsQuery.data?.data?.length) {
-      setActiveTeam(organizationsQuery.data.data.find(org => org.id === params.organizationId));
+      const orgs = organizationsQuery.data.data;
+
+      // Try to resolve from current URL first
+      let team =
+        orgs.find((org) => org.id === params.organizationId) ?? null;
+
+      // If no team in URL, try localStorage
+      if (!team) {
+        const storedId = localStorage.getItem(STORAGE_KEY);
+        if (storedId) {
+          team = orgs.find((org) => org.id === storedId) ?? null;
+        }
+      }
+
+      setActiveTeam(team);
     } else {
       setActiveTeam(null);
     }
-  }, [organizationsQuery.data]);
+  }, [organizationsQuery.data, params.organizationId]);
 
   function selectTeam(team: any) {
+    // Swap out the org ID in the path
+    const segments = pathname.split("/");
+    segments[2] = team.id; // "/org/{id}/..."
+    const newPath = segments.join("/");
+
+    // Preserve query string if present
+    const query = searchParams.toString();
+    const href = query ? `${newPath}?${query}` : newPath;
+
     setActiveTeam(team);
-    router.push(`/org/${team.id}/dashboard`);
+    localStorage.setItem(STORAGE_KEY, team.id); // persist selection
+    router.push(href);
   }
 
   const loading = organizationsQuery.isLoading;
