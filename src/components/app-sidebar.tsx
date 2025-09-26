@@ -1,6 +1,6 @@
 "use client";
 
-import { File, LayoutDashboard, Settings, Users } from 'lucide-react';
+import { File, LayoutDashboard, QrCode, Settings, Users } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import * as React from 'react';
 
@@ -8,6 +8,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from '@/components/ui/sidebar';
 import { useAuth } from '@/context/AuthProvider';
+import { IconUsersPlus } from '@tabler/icons-react';
 
 import { TeamSwitcher } from './team-switcher';
 
@@ -29,9 +30,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Users,
     },
     {
-      title: "Exportar Datos",
+      title: "Reportes",
       url: `/org/${params.organizationId}/reports`,
       icon: File,
+    },
+    {
+      title: "Códigos QR",
+      url: `/org/${params.organizationId}/qr-codes`,
+      icon: QrCode,
+    },
+    {
+      title: "Equipo",
+      url: `/org/${params.organizationId}/team`,
+      icon: IconUsersPlus,
     },
     {
       title: "Configuración",

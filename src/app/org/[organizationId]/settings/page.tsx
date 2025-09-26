@@ -1,6 +1,7 @@
 "use client";
 
-import { PlusIcon } from 'lucide-react';
+import { FileOutput, PlusIcon } from 'lucide-react';
+import { useParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 
 import { AppSidebar } from '@/components/app-sidebar';
@@ -12,13 +13,16 @@ import { DeleteVisitorDialog, VisitorDialog, VisitorsTable } from '@/features/vi
 import { Visitor } from '@/features/visitors/components/VisitorsTable';
 
 export default function Page() {
+  const params = useParams();
   const [searchInput, setSearchInput] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<Visitor | null>(null);
 
   const queryKeyGetter = useCallback(() => {
-    return searchInput ? ["visitors", { searchInput }] : ["visitors"];
+    const organizationId = params.organizationId?.toString();
+
+    return searchInput ? ["visitors", { searchInput, organizationId }] : ["visitors", { organizationId }];
   }, [searchInput]);
 
   function openEditDialog(visitor: Visitor) {
@@ -64,6 +68,13 @@ export default function Page() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+              <div className="flex items-center justify-between">
+                <div><div className='font-medium text-xl'>Configuración</div><div className='text-muted-foreground text-sm'>Configure your visitor registration system</div></div>
+                <Button disabled>
+                  <FileOutput className="size-4" />
+                  Export selected
+                </Button>
+              </div>
               <div className="flex justify-between">
                 <Input
                   value={searchInput}

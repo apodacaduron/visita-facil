@@ -1,48 +1,19 @@
 "use client";
 
-import { PlusIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { CheckCircle, Download } from 'lucide-react';
 
 import { AppSidebar } from '@/components/app-sidebar';
 import { SiteHeader } from '@/components/site-header';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import {
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { DeleteVisitorDialog, VisitorDialog, VisitorsTable } from '@/features/visitors'; // adjust path as needed
-import { Visitor } from '@/features/visitors/components/VisitorsTable';
 
 export default function Page() {
-  const [searchInput, setSearchInput] = useState("");
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState<Visitor | null>(null);
-
-  const queryKeyGetter = useCallback(() => {
-    return searchInput ? ["visitors", { searchInput }] : ["visitors"];
-  }, [searchInput]);
-
-  function openEditDialog(visitor: Visitor) {
-    setCurrentItem(visitor);
-    setFormDialogOpen(true);
-  }
-
-  function openDeleteDialog(visitor: Visitor) {
-    setCurrentItem(visitor);
-    setDeleteDialogOpen(true);
-  }
-
-  function handleFormDialogChange(open: boolean) {
-    setFormDialogOpen(open);
-
-    if (!open) setCurrentItem(null);
-  }
-
-  function handleDeleteDialogChange(open: boolean) {
-    setDeleteDialogOpen(open);
-
-    if (!open) setCurrentItem(null);
-  }
-
   return (
     <SidebarProvider
       style={
@@ -57,61 +28,143 @@ export default function Page() {
         <SiteHeader
           breadcrumbs={[
             {
-              label: "Visitors",
+              label: "Reportes",
             },
           ]}
         />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
-              <div className="flex justify-between">
-                <Input
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Search..."
-                  className="max-w-64"
-                  type="search"
-                />
-
-                {/* Create and edit dialog */}
-                <VisitorDialog
-                  onSuccess={() => {
-                    setFormDialogOpen(false);
-                    setCurrentItem(null);
-                  }}
-                  item={currentItem}
-                  queryKeyGetter={queryKeyGetter}
-                  dialogProps={{
-                    open: formDialogOpen,
-                    onOpenChange: handleFormDialogChange,
-                  }}
-                />
-                <Button onClick={() => setFormDialogOpen(true)}>
-                  <PlusIcon className="size-4" />
-                  Create
-                </Button>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-xl">Reportes</div>
+                  <div className="text-muted-foreground text-sm">
+                    Download visitor registration data in your preferred format
+                  </div>
+                </div>
               </div>
 
-              <DeleteVisitorDialog
-                onSuccess={() => {
-                  setDeleteDialogOpen(false);
-                  setCurrentItem(null);
-                }}
-                queryKeyGetter={queryKeyGetter}
-                itemId={currentItem?.id}
-                itemName={currentItem?.name}
-                dialogProps={{
-                  open: deleteDialogOpen,
-                  onOpenChange: handleDeleteDialogChange,
-                }}
-              />
+              {/* Main Grid */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  {/* Date Range */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Date Range</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input placeholder="dd/mm/yyyy" type="date" />
+                        <Input placeholder="dd/mm/yyyy" type="date" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Leave empty to export all data
+                      </p>
+                    </CardContent>
+                  </Card>
 
-              {/* Visitors table */}
-              <VisitorsTable
-                onEdit={openEditDialog}
-                onDelete={openDeleteDialog}
-                queryKeyGetter={queryKeyGetter}
-              />
+                  {/* Fields to Include */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Fields to Include</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-3">
+                      {[
+                        "Name",
+                        "Email",
+                        "City",
+                        "Visit Date",
+                        "People Count",
+                        "Created At",
+                      ].map((field, i) => (
+                        <label
+                          key={i}
+                          className="flex items-center gap-2 text-sm"
+                        >
+                          <Checkbox defaultChecked={field !== "Created At"} />
+                          {field}
+                        </label>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  {/* Export Format */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Export Format</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Select defaultValue="excel">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select format" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="excel">Excel (.xlsx)</SelectItem>
+                          <SelectItem value="pdf">PDF</SelectItem>
+                          <SelectItem value="csv">CSV</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button className="w-full">Export Data</Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Export Summary */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Export Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm space-y-1">
+                      <div>
+                        Format: <span className="font-medium">Excel</span>
+                      </div>
+                      <div>
+                        Fields: <span className="font-medium">6 selected</span>
+                      </div>
+                      <div>
+                        Date Range:{" "}
+                        <span className="font-medium">All Time</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Recent Exports */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Recent Exports</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { name: "Excel Export", time: "2 hours ago" },
+                        { name: "PDF Report", time: "Yesterday" },
+                      ].map((item, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between rounded-lg border p-3"
+                        >
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium">
+                                {item.name}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {item.time}
+                              </span>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             </div>
           </div>
         </div>

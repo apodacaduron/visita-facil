@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown, Plus } from 'lucide-react';
+import { Building, ChevronsUpDown, Plus } from 'lucide-react';
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
@@ -45,8 +45,7 @@ export function TeamSwitcher() {
       const orgs = organizationsQuery.data.data;
 
       // Try to resolve from current URL first
-      let team =
-        orgs.find((org) => org.id === params.organizationId) ?? null;
+      let team = orgs.find((org) => org.id === params.organizationId) ?? null;
 
       // If no team in URL, try localStorage
       if (!team) {
@@ -91,11 +90,21 @@ export function TeamSwitcher() {
               >
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   {loading ? (
-                    <div className="h-4 w-24 bg-gray-300 rounded animate-pulse" />
+                    <div className="h-6 w-32 bg-gray-300 rounded animate-pulse" />
                   ) : (
-                    <span className="truncate font-medium">
-                      {activeTeam?.name}
-                    </span>
+                    <div className="flex gap-2">
+                      <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                        <Building className="size-4" />
+                      </div>
+                      <div className="grid flex-1 text-left text-sm leading-tight">
+                        <span className="truncate font-medium">
+                          {activeTeam?.name}
+                        </span>
+                        <span className="truncate text-xs">
+                          Admin dashboard
+                        </span>
+                      </div>
+                    </div>
                   )}
                 </div>
                 <ChevronsUpDown className="ml-auto" />
