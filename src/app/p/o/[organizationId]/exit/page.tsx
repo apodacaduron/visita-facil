@@ -45,11 +45,11 @@ export default function ExitPage() {
         return supabase
           .from("visitors")
           .update({ ...data, exited_at, organization_id })
-          .eq("id", visitorId);
+          .eq("id", visitorId).throwOnError();
       } else {
         return supabase
           .from("visitors")
-          .insert({ ...data, name: "unknown", exited_at, people_count: 1, organization_id });
+          .insert({ ...data, name: "unknown", exited_at, people_count: 1, organization_id }).throwOnError();
       }
     },
     onSuccess() {
@@ -74,8 +74,10 @@ export default function ExitPage() {
     try {
       const data = JSON.parse(raw);
       if (Date.now() < data.expiresAt) return data.id;
+      console.log('Entro 1')
       localStorage.removeItem("visitor_session");
     } catch {
+      console.log('Entro 2')
       localStorage.removeItem("visitor_session");
     }
     return null;
