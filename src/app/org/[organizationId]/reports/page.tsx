@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { AppSidebar } from '@/components/app-sidebar';
@@ -12,6 +13,7 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { supabase } from '@/lib/supabase';
 
 export default function Page() {
   const allFields = [
@@ -23,10 +25,13 @@ export default function Page() {
     { key: "created_at", label: "Created At" },
   ];
 
+  const params = useParams();
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
-  const [selectedFields, setSelectedFields] = useState<string[]>(allFields.map(f => f.key));
-  const [format, setFormat] = useState<"csv" | "excel">("csv");
+  const [selectedFields, setSelectedFields] = useState<string[]>(
+    allFields.map((f) => f.key)
+  );
+  const [format, setFormat] = useState<"csv" | "xlsx">("csv");
   const [loading, setLoading] = useState(false);
 
   async function handleExport() {
@@ -38,12 +43,21 @@ export default function Page() {
     setLoading(true);
 
     try {
+      // Get the session token of the current logged-in user
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+      if (sessionError || !session) throw new Error("User not authenticated");
+
+      const token = session.access_token;
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/export-visitors`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+            Authorization: `Bearer ${token}`, // <-- use user token, not anon key
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -51,6 +65,7 @@ export default function Page() {
             endDate: endDate || null,
             fields: selectedFields,
             format,
+            orgId: params.organizationId?.toString(),
           }),
         }
       );
@@ -60,12 +75,15 @@ export default function Page() {
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
 
-      // Timestamped filename
       const now = new Date();
       const pad = (n: number) => n.toString().padStart(2, "0");
-      const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+      const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
+        now.getDate()
+      )}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(
+        now.getSeconds()
+      )}`;
+      const ext = format === "xlsx" ? "xlsx" : "csv";
 
-      const ext = format === "excel" ? "xlsx" : "csv";
       const a = document.createElement("a");
       a.href = url;
       a.download = `Visitors_${timestamp}.${ext}`;
@@ -80,8 +98,8 @@ export default function Page() {
   }
 
   function toggleField(key: string) {
-    setSelectedFields(prev =>
-      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    setSelectedFields((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
   }
 
@@ -145,7 +163,10 @@ export default function Page() {
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 gap-3">
                       {allFields.map((f) => (
-                        <label key={f.key} className="flex items-center gap-2 text-sm">
+                        <label
+                          key={f.key}
+                          className="flex items-center gap-2 text-sm"
+                        >
                           <Checkbox
                             checked={selectedFields.includes(f.key)}
                             onCheckedChange={() => toggleField(f.key)}
@@ -165,16 +186,23 @@ export default function Page() {
                       <CardTitle>Export Format</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Select value={format} onValueChange={(v) => setFormat(v as any)}>
+                      <Select
+                        value={format}
+                        onValueChange={(v) => setFormat(v as any)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select format" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="csv">CSV</SelectItem>
-                          <SelectItem value="excel">Excel (.xlsx)</SelectItem>
+                          <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button className="w-full" onClick={handleExport} disabled={loading}>
+                      <Button
+                        className="w-full"
+                        onClick={handleExport}
+                        disabled={loading}
+                      >
                         {loading ? "Generating..." : "Export Data"}
                       </Button>
                     </CardContent>
