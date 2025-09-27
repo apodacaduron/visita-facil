@@ -1,8 +1,8 @@
 "use client";
 
-import { GalleryVerticalEnd, Loader2Icon } from 'lucide-react';
+import { Check, ChevronsUpDown, GalleryVerticalEnd, Loader2Icon } from 'lucide-react';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import z from 'zod';
@@ -10,13 +10,18 @@ import z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
+    Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList
+} from '@/components/ui/command';
+import {
     Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useDebounce } from '@/hooks/use-debounce';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 const visitorSchema = z.object({
   name: z.string().min(1, { message: "El nombre es obligatorio" }),
@@ -25,12 +30,15 @@ const visitorSchema = z.object({
     .email({ message: "Correo electrónico inválido" })
     .or(z.literal("")),
   people_count: z.number().int().nullable(),
-  city: z.string().nullable(),
+  city_id: z.int().nullable(),
 });
 type VisitorSchema = z.infer<typeof visitorSchema>;
 
 export default function Page() {
   const [submitted, setSubmitted] = useState(false);
+  const [citySearch, setCitySearch] = useState("");
+  const [cityOpen, setCityOpen] = useState(false);
+  const debouncedCitySearch = useDebounce(citySearch, 300);
   const params = useParams();
   const form = useForm<VisitorSchema>({
     resolver: zodResolver(visitorSchema),
@@ -38,9 +46,28 @@ export default function Page() {
       name: "",
       email: "",
       people_count: 1, // default to 1
-      city: "", // default to empty string
+      city_id: null, // default to empty string
     },
   });
+
+  const citysQuery = useQuery({
+    queryKey: ["city-search", debouncedCitySearch],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cities")
+        .select("id, name, state_name, country_name")
+        .ilike("name", `%${debouncedCitySearch}%`);
+
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: cityOpen || !!debouncedCitySearch,
+  });
+
+  const selectedCity = useMemo(
+    () => citysQuery.data?.find((c) => c.id === form.getValues("city_id")),
+    [citysQuery.data, form.watch("city_id")]
+  );
 
   const createMutation = useMutation({
     mutationFn: async (data: VisitorSchema) => {
@@ -180,20 +207,62 @@ export default function Page() {
                       )}
                     />
 
+                    {/* City Selector */}
                     <FormField
                       control={form.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ciudad de origen</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="¿De qué ciudad nos visitas?"
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) => field.onChange(e.target.value)}
-                            />
-                          </FormControl>
+                      name="city_id"
+                      render={() => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>City</FormLabel>
+                          <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  role="combobox"
+                                  className="justify-between w-full"
+                                >
+                                  {selectedCity ? `${selectedCity.name}, ${selectedCity.state_name}, ${selectedCity.country_name}` : "Select a city"}
+                                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-full p-0">
+                              <Command>
+                                <CommandInput
+                                  placeholder="Search city..."
+                                  className="h-9"
+                                  value={citySearch}
+                                  onValueChange={setCitySearch}
+                                />
+                                <CommandList>
+                                  <CommandEmpty>No cities found.</CommandEmpty>
+                                  <CommandGroup>
+                                    {citysQuery.data?.map((city) => (
+                                      <CommandItem
+                                        key={city.id}
+                                        value={city.name ?? ""}
+                                        onSelect={() => {
+                                          form.setValue("city_id", city.id);
+                                          setCityOpen(false);
+                                        }}
+                                      >
+                                        {`${city.name}, ${city.state_name}, ${city.country_name}`}
+                                        <Check
+                                          className={cn(
+                                            "ml-auto h-4 w-4",
+                                            city.id === form.watch("city_id")
+                                              ? "opacity-100"
+                                              : "opacity-0"
+                                          )}
+                                        />
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}

@@ -56,6 +56,51 @@ export type Database = {
           },
         ]
       }
+      cities: {
+        Row: {
+          country_code: string | null
+          country_id: number | null
+          country_name: string | null
+          id: number
+          latitude: number | null
+          longitude: number | null
+          name: string
+          state_code: string | null
+          state_id: number | null
+          state_name: string | null
+          timezone: string | null
+          wikidata_id: string | null
+        }
+        Insert: {
+          country_code?: string | null
+          country_id?: number | null
+          country_name?: string | null
+          id: number
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          state_code?: string | null
+          state_id?: number | null
+          state_name?: string | null
+          timezone?: string | null
+          wikidata_id?: string | null
+        }
+        Update: {
+          country_code?: string | null
+          country_id?: number | null
+          country_name?: string | null
+          id?: number
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          state_code?: string | null
+          state_id?: number | null
+          state_name?: string | null
+          timezone?: string | null
+          wikidata_id?: string | null
+        }
+        Relationships: []
+      }
       organization_memberships: {
         Row: {
           created_at: string | null
@@ -336,7 +381,7 @@ export type Database = {
       }
       visitors: {
         Row: {
-          city: string | null
+          city_id: number | null
           created_at: string | null
           email: string | null
           exit_feedback: string | null
@@ -350,7 +395,7 @@ export type Database = {
           visit_date: string
         }
         Insert: {
-          city?: string | null
+          city_id?: number | null
           created_at?: string | null
           email?: string | null
           exit_feedback?: string | null
@@ -364,7 +409,7 @@ export type Database = {
           visit_date?: string
         }
         Update: {
-          city?: string | null
+          city_id?: number | null
           created_at?: string | null
           email?: string | null
           exit_feedback?: string | null
@@ -378,6 +423,13 @@ export type Database = {
           visit_date?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "visitors_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "visitors_organization_id_fkey"
             columns: ["organization_id"]
