@@ -63,7 +63,7 @@ const Pricing = () => {
             Simple, Transparent Pricing
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Choose the plan that fits your institution's needs. Start free and upgrade as you grow.
+            Choose the plan that fits your institution&apos;s needs. Start free and upgrade as you grow.
           </p>
         </div>
         

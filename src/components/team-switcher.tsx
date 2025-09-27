@@ -15,6 +15,8 @@ import CreateOrganizationDialog from '@/features/organizations/components/Create
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 
+import { Tables } from '../../database.types';
+
 const STORAGE_KEY = "activeTeamId";
 
 export function TeamSwitcher() {
@@ -24,7 +26,7 @@ export function TeamSwitcher() {
   const params = useParams();
   const { isMobile } = useSidebar();
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
-  const [activeTeam, setActiveTeam] = React.useState<any>(null);
+  const [activeTeam, setActiveTeam] = React.useState<Tables<'organizations'> | null>(null);
 
   const organizationsQuery = useQuery({
     queryKey: ["organizations"],
@@ -61,7 +63,7 @@ export function TeamSwitcher() {
     }
   }, [organizationsQuery.data, params.organizationId]);
 
-  function selectTeam(team: any) {
+  function selectTeam(team: Tables<'organizations'>) {
     // Swap out the org ID in the path
     const segments = pathname.split("/");
     segments[2] = team.id; // "/org/{id}/..."

@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, Download } from 'lucide-react';
+import { useState } from 'react';
 
 import { AppSidebar } from '@/components/app-sidebar';
 import { SiteHeader } from '@/components/site-header';
@@ -14,6 +14,77 @@ import {
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 export default function Page() {
+  const allFields = [
+    { key: "name", label: "Name" },
+    { key: "email", label: "Email" },
+    { key: "city", label: "City" },
+    { key: "visit_date", label: "Visit Date" },
+    { key: "people_count", label: "People Count" },
+    { key: "created_at", label: "Created At" },
+  ];
+
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [selectedFields, setSelectedFields] = useState<string[]>(allFields.map(f => f.key));
+  const [format, setFormat] = useState<"csv" | "excel">("csv");
+  const [loading, setLoading] = useState(false);
+
+  async function handleExport() {
+    if (selectedFields.length === 0) {
+      alert("Select at least one field to export");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/export-visitors`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            startDate: startDate || null,
+            endDate: endDate || null,
+            fields: selectedFields,
+            format,
+          }),
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to generate report");
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      // Timestamped filename
+      const now = new Date();
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+
+      const ext = format === "excel" ? "xlsx" : "csv";
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Visitors_${timestamp}.${ext}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Error exporting data");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function toggleField(key: string) {
+    setSelectedFields(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  }
+
   return (
     <SidebarProvider
       style={
@@ -25,13 +96,7 @@ export default function Page() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader
-          breadcrumbs={[
-            {
-              label: "Reportes",
-            },
-          ]}
-        />
+        <SiteHeader breadcrumbs={[{ label: "Reportes" }]} />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
@@ -44,7 +109,6 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* Main Grid */}
               <div className="grid gap-6 md:grid-cols-2">
                 {/* Left Column */}
                 <div className="space-y-6">
@@ -55,8 +119,18 @@ export default function Page() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
-                        <Input placeholder="dd/mm/yyyy" type="date" />
-                        <Input placeholder="dd/mm/yyyy" type="date" />
+                        <Input
+                          placeholder="dd/mm/yyyy"
+                          type="date"
+                          value={startDate}
+                          onChange={(e) => setStartDate(e.target.value)}
+                        />
+                        <Input
+                          placeholder="dd/mm/yyyy"
+                          type="date"
+                          value={endDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                        />
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Leave empty to export all data
@@ -70,20 +144,13 @@ export default function Page() {
                       <CardTitle>Fields to Include</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 gap-3">
-                      {[
-                        "Name",
-                        "Email",
-                        "City",
-                        "Visit Date",
-                        "People Count",
-                        "Created At",
-                      ].map((field, i) => (
-                        <label
-                          key={i}
-                          className="flex items-center gap-2 text-sm"
-                        >
-                          <Checkbox defaultChecked={field !== "Created At"} />
-                          {field}
+                      {allFields.map((f) => (
+                        <label key={f.key} className="flex items-center gap-2 text-sm">
+                          <Checkbox
+                            checked={selectedFields.includes(f.key)}
+                            onCheckedChange={() => toggleField(f.key)}
+                          />
+                          {f.label}
                         </label>
                       ))}
                     </CardContent>
@@ -98,69 +165,18 @@ export default function Page() {
                       <CardTitle>Export Format</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <Select defaultValue="excel">
+                      <Select value={format} onValueChange={(v) => setFormat(v as any)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select format" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="excel">Excel (.xlsx)</SelectItem>
-                          <SelectItem value="pdf">PDF</SelectItem>
                           <SelectItem value="csv">CSV</SelectItem>
+                          <SelectItem value="excel">Excel (.xlsx)</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button className="w-full">Export Data</Button>
-                    </CardContent>
-                  </Card>
-
-                  {/* Export Summary */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Export Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm space-y-1">
-                      <div>
-                        Format: <span className="font-medium">Excel</span>
-                      </div>
-                      <div>
-                        Fields: <span className="font-medium">6 selected</span>
-                      </div>
-                      <div>
-                        Date Range:{" "}
-                        <span className="font-medium">All Time</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Recent Exports */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Recent Exports</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {[
-                        { name: "Excel Export", time: "2 hours ago" },
-                        { name: "PDF Report", time: "Yesterday" },
-                      ].map((item, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between rounded-lg border p-3"
-                        >
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium">
-                                {item.name}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {item.time}
-                              </span>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="icon">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                      <Button className="w-full" onClick={handleExport} disabled={loading}>
+                        {loading ? "Generating..." : "Export Data"}
+                      </Button>
                     </CardContent>
                   </Card>
                 </div>

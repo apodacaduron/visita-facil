@@ -9,122 +9,119 @@ import { SiteHeader } from '@/components/site-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { DeleteVisitorDialog, VisitorDialog, VisitorsTable } from '@/features/visitors'; // adjust path as needed
-import { Visitor } from '@/features/visitors/components/VisitorsTable';
+import {
+    DeleteMemberDialog, InviteMemberDialog, MembersTable
+} from '@/features/organizations/components'; // make sure these exist
+import { Member } from '@/features/organizations/components/MembersTable';
 
-export default function Page() {
+export default function TeamPage() {
   const params = useParams();
   const [searchInput, setSearchInput] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState<Visitor | null>(null);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState<Member | null>(null);
 
+  // Query key for react-query
   const queryKeyGetter = useCallback(() => {
     const organizationId = params.organizationId?.toString();
+    return searchInput
+      ? ["members", { searchInput, organizationId }]
+      : ["members", { organizationId }];
+  }, [searchInput, params.organizationId]);
 
-    return searchInput ? ["visitors", { searchInput, organizationId }] : ["visitors", { organizationId }];
-  }, [searchInput]);
-
-  function openEditDialog(visitor: Visitor) {
-    setCurrentItem(visitor);
-    setFormDialogOpen(true);
+  function openEditDialog(member: Member) {
+    setCurrentItem(member);
+    setInviteDialogOpen(true);
   }
 
-  function openDeleteDialog(visitor: Visitor) {
-    setCurrentItem(visitor);
+  function openDeleteDialog(member: Member) {
+    setCurrentItem(member);
     setDeleteDialogOpen(true);
   }
 
-  function handleFormDialogChange(open: boolean) {
-    setFormDialogOpen(open);
-
+  function handleInviteDialogChange(open: boolean) {
+    setInviteDialogOpen(open);
     if (!open) setCurrentItem(null);
   }
 
   function handleDeleteDialogChange(open: boolean) {
     setDeleteDialogOpen(open);
-
     if (!open) setCurrentItem(null);
   }
 
   return (
     <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
+      style={{
+        "--sidebar-width": "calc(var(--spacing) * 72)",
+        "--header-height": "calc(var(--spacing) * 12)",
+      } as React.CSSProperties}
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader
-          breadcrumbs={[
-            {
-              label: "Visitors",
-            },
-          ]}
-        />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
-              <div className="flex items-center justify-between">
-                <div><div className='font-medium text-xl'>Visitors</div><div className='text-muted-foreground text-sm'>Manage and view all visitor registrations</div></div>
-                <Button disabled>
-                  <FileOutput className="size-4" />
-                  Export selected
-                </Button>
+        <SiteHeader breadcrumbs={[{ label: "Team" }]} />
+        <div className="flex flex-1 flex-col p-6 gap-4">
+          {/* Page Title */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium text-xl">Team Members</div>
+              <div className="text-muted-foreground text-sm">
+                Manage and view all organization members
               </div>
-              <div className="flex justify-between">
-                <Input
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Search..."
-                  className="max-w-64"
-                  type="search"
-                />
-
-                {/* Create and edit dialog */}
-                <VisitorDialog
-                  onSuccess={() => {
-                    setFormDialogOpen(false);
-                    setCurrentItem(null);
-                  }}
-                  item={currentItem}
-                  queryKeyGetter={queryKeyGetter}
-                  dialogProps={{
-                    open: formDialogOpen,
-                    onOpenChange: handleFormDialogChange,
-                  }}
-                />
-                <Button onClick={() => setFormDialogOpen(true)}>
-                  <PlusIcon className="size-4" />
-                  Create
-                </Button>
-              </div>
-
-              <DeleteVisitorDialog
-                onSuccess={() => {
-                  setDeleteDialogOpen(false);
-                  setCurrentItem(null);
-                }}
-                queryKeyGetter={queryKeyGetter}
-                itemId={currentItem?.id}
-                itemName={currentItem?.name}
-                dialogProps={{
-                  open: deleteDialogOpen,
-                  onOpenChange: handleDeleteDialogChange,
-                }}
-              />
-
-              {/* Visitors table */}
-              <VisitorsTable
-                onEdit={openEditDialog}
-                onDelete={openDeleteDialog}
-                queryKeyGetter={queryKeyGetter}
-              />
             </div>
+            <Button disabled>
+              <FileOutput className="size-4" />
+              Export selected
+            </Button>
           </div>
+
+          {/* Search + Invite */}
+          <div className="flex justify-between items-center gap-2">
+            <Input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search members..."
+              className="max-w-64"
+              type="search"
+            />
+
+            <InviteMemberDialog
+              queryKeyGetter={queryKeyGetter}
+              dialogProps={{
+                open: inviteDialogOpen,
+                onOpenChange: handleInviteDialogChange,
+              }}
+              onSuccess={() => {
+                setInviteDialogOpen(false);
+                setCurrentItem(null);
+              }}
+            />
+            <Button onClick={() => setInviteDialogOpen(true)}>
+              <PlusIcon className="size-4" />
+              Invite Member
+            </Button>
+          </div>
+
+          {/* Delete dialog */}
+          <DeleteMemberDialog
+            itemId={currentItem?.id}
+            itemName={currentItem?.users?.email ?? currentItem?.id}
+            queryKeyGetter={queryKeyGetter}
+            dialogProps={{
+              open: deleteDialogOpen,
+              onOpenChange: handleDeleteDialogChange,
+            }}
+            onSuccess={() => {
+              setDeleteDialogOpen(false);
+              setCurrentItem(null);
+            }}
+          />
+
+          {/* Members table */}
+          <MembersTable
+            onEdit={openEditDialog}
+            onDelete={openDeleteDialog}
+            queryKeyGetter={queryKeyGetter}
+          />
         </div>
       </SidebarInset>
     </SidebarProvider>

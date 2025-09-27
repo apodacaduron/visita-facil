@@ -339,6 +339,9 @@ export type Database = {
           city: string | null
           created_at: string | null
           email: string | null
+          exit_feedback: string | null
+          exit_rating: number | null
+          exited_at: string | null
           id: string
           name: string
           organization_id: string | null
@@ -350,6 +353,9 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           email?: string | null
+          exit_feedback?: string | null
+          exit_rating?: number | null
+          exited_at?: string | null
           id?: string
           name: string
           organization_id?: string | null
@@ -361,6 +367,9 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           email?: string | null
+          exit_feedback?: string | null
+          exit_rating?: number | null
+          exited_at?: string | null
           id?: string
           name?: string
           organization_id?: string | null

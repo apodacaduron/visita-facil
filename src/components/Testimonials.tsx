@@ -47,7 +47,7 @@ const Testimonials = () => {
                 </div>
                 
                 <blockquote className="text-foreground mb-6 leading-relaxed">
-                  "{testimonial.content}"
+                  &quot;{testimonial.content}&quot;
                 </blockquote>
                 
                 <div className="border-t border-card-border pt-4">
