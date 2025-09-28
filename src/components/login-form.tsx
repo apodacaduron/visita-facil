@@ -22,6 +22,9 @@ export function LoginForm() {
                   onClick={() =>
                     supabase.auth.signInWithOAuth({
                       provider: "google",
+                      options: {
+                        redirectTo: `${location.origin}/login`, // Make sure this matches middleware routing
+                      },
                     })
                   }
                   variant="outline"
