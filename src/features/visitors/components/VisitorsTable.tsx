@@ -1,5 +1,6 @@
 "use client";
 
+import { Star } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
@@ -105,30 +106,56 @@ export default function VisitorsTable(props: Props) {
     ),
 
     // Nueva columna de Feedback
+    columnHelper.accessor((row) => row.exit_feedback && row.exit_feedback?.length > 30
+            ? row.exit_feedback?.slice(0, 30) + "…"
+            : row.exit_feedback ?? "-", {
+      id: "feedback",
+      header: "Feedback",
+      cell: (info) => info.getValue(),
+    }),
+
+    // New column for exit rating
+    columnHelper.accessor((row) => row.exit_rating ?? 0, {
+      id: "rating",
+      header: "Rating",
+      cell: (info) => {
+        const rating = info.getValue();
+
+        if (!rating) return '-'
+
+        return (
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star
+                key={i}
+                size={16}
+                className={i <= rating ? "text-yellow-400" : "text-gray-300"}
+              />
+            ))}
+          </div>
+        );
+      },
+    }),
+
+    // Duration column
     columnHelper.accessor(
       (row) => {
-        const exitRating = row.exit_rating ?? "-";
-        const exitFeedbackFull = row.exit_feedback ?? "-";
-        const exitFeedback =
-          exitFeedbackFull.length > 30
-            ? exitFeedbackFull.slice(0, 30) + "…"
-            : exitFeedbackFull;
+        if (!row.visit_date || !row.exited_at) return "-";
+        const visit = new Date(row.visit_date);
+        const exit = new Date(row.exited_at);
+        const diffMs = exit.getTime() - visit.getTime();
+        if (diffMs < 0) return "-";
 
-        return { exitRating, exitFeedback, exitFeedbackFull };
+        const diffMins = Math.floor(diffMs / 60000);
+        const hours = Math.floor(diffMins / 60);
+        const minutes = diffMins % 60;
+
+        return `${hours > 0 ? `${hours}h ` : ""}${minutes}m`;
       },
       {
-        id: "exit",
-        header: "Salida / Feedback",
-        cell: (info) => {
-          const { exitRating, exitFeedback, exitFeedbackFull } =
-            info.getValue();
-          return (
-            <div className="whitespace-pre-line">
-              <div>Rating: {exitRating}/5</div>
-              <div title={exitFeedbackFull}>Feedback: {exitFeedback}</div>
-            </div>
-          );
-        },
+        id: "duration",
+        header: "Duración",
+        cell: (info) => <div>{info.getValue()}</div>,
       }
     ),
     columnHelper.display({
