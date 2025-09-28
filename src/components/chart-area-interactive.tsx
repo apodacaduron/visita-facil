@@ -32,7 +32,12 @@ async function fetchChartData(orgId: string, daysBack: number) {
 
   if (error) throw error;
 
-  return data.map((item: any) => ({
+interface VisitorData {
+  visit_date: string;
+  count: number;
+}
+
+  return data.map((item: VisitorData) => ({
     date: item.visit_date,
     visitors: item.count,
   }));

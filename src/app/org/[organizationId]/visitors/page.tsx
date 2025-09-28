@@ -24,7 +24,7 @@ export default function Page() {
     return searchInput
       ? ["visitors", { searchInput, organizationId }]
       : ["visitors", { organizationId }];
-  }, [searchInput]);
+  }, [searchInput, params.organizationId]);
 
   function openEditDialog(visitor: Visitor) {
     setCurrentItem(visitor);

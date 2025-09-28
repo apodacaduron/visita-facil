@@ -16,7 +16,7 @@ export default function Page() {
     const organizationId = params.organizationId?.toString();
 
     return ["visitors", { organizationId }];
-  }, []);
+  }, [params.organizationId]);
 
   return (
     <SidebarProvider
