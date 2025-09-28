@@ -28,7 +28,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Visitor } from './VisitorsTable';
 
-dayjs.extend(utc)
+dayjs.extend(utc);
 const visitorSchema = z.object({
   name: z.string().min(1, { message: "El nombre es obligatorio" }),
   email: z
@@ -71,14 +71,13 @@ export default function VisitorForm(props: Props) {
     },
   });
 
-    const citysQuery = useQuery({
+  const citysQuery = useQuery({
     queryKey: ["city-search", debouncedCitySearch],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("cities")
-        .select("id, name")
-        .ilike("name", `%${debouncedCitySearch}%`)
-        .order("created_at", { ascending: false });
+        .select("id, name, state_name, country_name")
+        .ilike("name", `%${debouncedCitySearch}%`).limit(10);
 
       if (error) throw error;
       return data ?? [];
@@ -257,65 +256,82 @@ export default function VisitorForm(props: Props) {
             />
 
             {/* City Selector */}
-                    <FormField
-                      control={form.control}
-                      name="city_id"
-                      render={() => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>City</FormLabel>
-                          <Popover open={cityOpen} onOpenChange={setCityOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  className="justify-between w-full"
-                                >
-                                  {selectedCity?.name ?? "Select a city"}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full p-0">
-                              <Command>
-                                <CommandInput
-                                  placeholder="Search city..."
-                                  className="h-9"
-                                  value={citySearch}
-                                  onValueChange={setCitySearch}
-                                />
-                                <CommandList>
-                                  <CommandEmpty>No cities found.</CommandEmpty>
-                                  <CommandGroup>
-                                    {citysQuery.data?.map((city) => (
-                                      <CommandItem
-                                        key={city.id}
-                                        value={city.name ?? ""}
-                                        onSelect={() => {
-                                          form.setValue("city_id", city.id);
-                                          setCityOpen(false);
-                                        }}
-                                      >
-                                        {city.name}
-                                        <Check
-                                          className={cn(
-                                            "ml-auto h-4 w-4",
-                                            city.id === form.watch("city_id")
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+            <FormField
+              control={form.control}
+              name="city_id"
+              render={() => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>City</FormLabel>
+                  <Popover open={cityOpen} onOpenChange={setCityOpen}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          className="justify-between w-full"
+                        >
+                          {citysQuery.isLoading ? (
+                            <Loader2Icon className="animate-spin mr-2 h-4 w-4" />
+                          ) : selectedCity ? (
+                            `${selectedCity.name}, ${selectedCity.state_name}, ${selectedCity.country_name}`
+                          ) : (
+                            "Select a city"
+                          )}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0">
+                      <Command>
+                        <CommandInput
+                          placeholder="Search city..."
+                          className="h-9"
+                          value={citySearch}
+                          onValueChange={setCitySearch}
+                        />
+                        <CommandList>
+                          {citysQuery.isLoading ? (
+                            <CommandEmpty>
+                              <div className="flex items-center gap-2">
+                                <Loader2Icon className="animate-spin h-4 w-4" />
+                                Loading cities...
+                              </div>
+                            </CommandEmpty>
+                          ) : (
+                            <>
+                              <CommandEmpty>No cities found.</CommandEmpty>
+                              <CommandGroup>
+                                {citysQuery.data?.map((city) => (
+                                  <CommandItem
+                                    key={city.id}
+                                    value={city.name ?? ""}
+                                    onSelect={() => {
+                                      form.setValue("city_id", city.id);
+                                      setCityOpen(false);
+                                    }}
+                                  >
+                                    {`${city.name}, ${city.state_name}, ${city.country_name}`}
+                                    <Check
+                                      className={cn(
+                                        "ml-auto h-4 w-4",
+                                        city.id === form.watch("city_id")
+                                          ? "opacity-100"
+                                          : "opacity-0"
+                                      )}
+                                    />
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}

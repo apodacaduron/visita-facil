@@ -33,53 +33,100 @@ export default function VisitorsTable(props: Props) {
   const params = useParams();
 
   const columns = [
-    columnHelper.accessor("name", {
-      header: "Nombre",
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("email", {
-      header: "Correo",
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("people_count", {
-      header: "Personas",
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("city", {
-      header: "Ciudad",
-      cell: (info) => info.getValue(),
-    }),
-    columnHelper.accessor("visit_date", {
-      header: "Fecha de visita",
-      cell: (info) =>
-        new Date(info.getValue()).toLocaleDateString("es-MX", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-        }),
-    }),
-    columnHelper.accessor("created_at", {
-      header: "Creado el",
-      cell: (info) => {
-        const createdAt = info.getValue();
-        if (!createdAt) return '-';
-
-        return new Date(createdAt).toLocaleDateString("es-MX", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-        });
+    columnHelper.accessor(
+      (row) => {
+        const name = row.name ?? "-";
+        const email = row.email ?? "-";
+        const people = row.people_count ?? "-";
+        return `Nombre: ${name}\nCorreo: ${email}\nPersonas: ${people}`;
       },
-    }),
+      {
+        id: "identity",
+        header: "Visitante",
+        cell: (info) => (
+          <div className="whitespace-pre-line">{info.getValue()}</div>
+        ),
+      }
+    ),
+    columnHelper.accessor(
+      (row) => {
+        const city = row.cities.name ?? "-";
+        const state = row.cities.state_name ?? "-";
+        const country = row.cities.country_name ?? "-";
+        return `Ciudad: ${city}\nEstado: ${state}\nPaís: ${country}\n`;
+      },
+      {
+        id: "location",
+        header: "Ubicación",
+        cell: (info) => (
+          <div className="whitespace-pre-line">{info.getValue()}</div>
+        ),
+      }
+    ),
+    // Columna de Fechas
+    columnHelper.accessor(
+      (row) => {
+        const visitDate = row.visit_date
+          ? new Date(row.visit_date).toLocaleString("es-MX", {
+              dateStyle: "short",
+              timeStyle: "short",
+            })
+          : "-";
+        const exitedAt = row.exited_at
+          ? new Date(row.exited_at).toLocaleString("es-MX", {
+              dateStyle: "short",
+              timeStyle: "short",
+            })
+          : "-";
+
+        return { visitDate, exitedAt };
+      },
+      {
+        id: "timeline",
+        header: "Fechas",
+        cell: (info) => {
+          const { visitDate, exitedAt } = info.getValue();
+          return (
+            <div className="whitespace-pre-line">
+              <div>Visita: {visitDate}</div>
+              <div>Salida: {exitedAt}</div>
+            </div>
+          );
+        },
+      }
+    ),
+
+    // Nueva columna de Feedback
+    columnHelper.accessor(
+      (row) => {
+        const exitRating = row.exit_rating ?? "-";
+        const exitFeedbackFull = row.exit_feedback ?? "-";
+        const exitFeedback =
+          exitFeedbackFull.length > 30
+            ? exitFeedbackFull.slice(0, 30) + "…"
+            : exitFeedbackFull;
+
+        return { exitRating, exitFeedback, exitFeedbackFull };
+      },
+      {
+        id: "exit",
+        header: "Salida / Feedback",
+        cell: (info) => {
+          const { exitRating, exitFeedback, exitFeedbackFull } =
+            info.getValue();
+          return (
+            <div className="whitespace-pre-line">
+              <div>Rating: {exitRating}</div>
+              <div title={exitFeedbackFull}>Feedback: {exitFeedback}</div>
+            </div>
+          );
+        },
+      }
+    ),
     columnHelper.display({
-      header: "Actions",
+      header: "Acciones",
       cell: ({ row }) => {
         const visitor = row.original;
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -122,7 +169,7 @@ export default function VisitorsTable(props: Props) {
 
       const query = supabase
         .from("visitors")
-        .select("*")
+        .select("*, cities(name, state_name, country_name)")
         .order("created_at", { ascending: false })
         .eq("organization_id", organizationId)
         .throwOnError();

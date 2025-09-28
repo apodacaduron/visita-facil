@@ -56,7 +56,7 @@ export default function Page() {
       const { data, error } = await supabase
         .from("cities")
         .select("id, name, state_name, country_name")
-        .ilike("name", `%${debouncedCitySearch}%`);
+        .ilike("name", `%${debouncedCitySearch}%`).limit(10);
 
       if (error) throw error;
       return data ?? [];
@@ -222,7 +222,13 @@ export default function Page() {
                                   role="combobox"
                                   className="justify-between w-full"
                                 >
-                                  {selectedCity ? `${selectedCity.name}, ${selectedCity.state_name}, ${selectedCity.country_name}` : "Select a city"}
+                                  {citysQuery.isLoading ? (
+                                    <Loader2Icon className="animate-spin mr-2 h-4 w-4" />
+                                  ) : selectedCity ? (
+                                    `${selectedCity.name}, ${selectedCity.state_name}, ${selectedCity.country_name}`
+                                  ) : (
+                                    "Select a city"
+                                  )}
                                   <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                                 </Button>
                               </FormControl>
@@ -236,29 +242,43 @@ export default function Page() {
                                   onValueChange={setCitySearch}
                                 />
                                 <CommandList>
-                                  <CommandEmpty>No cities found.</CommandEmpty>
-                                  <CommandGroup>
-                                    {citysQuery.data?.map((city) => (
-                                      <CommandItem
-                                        key={city.id}
-                                        value={city.name ?? ""}
-                                        onSelect={() => {
-                                          form.setValue("city_id", city.id);
-                                          setCityOpen(false);
-                                        }}
-                                      >
-                                        {`${city.name}, ${city.state_name}, ${city.country_name}`}
-                                        <Check
-                                          className={cn(
-                                            "ml-auto h-4 w-4",
-                                            city.id === form.watch("city_id")
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
+                                  {citysQuery.isLoading ? (
+                                    <CommandEmpty>
+                                      <div className="flex items-center gap-2">
+                                        <Loader2Icon className="animate-spin h-4 w-4" />
+                                        Loading cities...
+                                      </div>
+                                    </CommandEmpty>
+                                  ) : (
+                                    <>
+                                      <CommandEmpty>
+                                        No cities found.
+                                      </CommandEmpty>
+                                      <CommandGroup>
+                                        {citysQuery.data?.map((city) => (
+                                          <CommandItem
+                                            key={city.id}
+                                            value={city.name ?? ""}
+                                            onSelect={() => {
+                                              form.setValue("city_id", city.id);
+                                              setCityOpen(false);
+                                            }}
+                                          >
+                                            {`${city.name}, ${city.state_name}, ${city.country_name}`}
+                                            <Check
+                                              className={cn(
+                                                "ml-auto h-4 w-4",
+                                                city.id ===
+                                                  form.watch("city_id")
+                                                  ? "opacity-100"
+                                                  : "opacity-0"
+                                              )}
+                                            />
+                                          </CommandItem>
+                                        ))}
+                                      </CommandGroup>
+                                    </>
+                                  )}
                                 </CommandList>
                               </Command>
                             </PopoverContent>
