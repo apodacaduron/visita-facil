@@ -22,12 +22,6 @@ export function LoginForm() {
                   onClick={() =>
                     supabase.auth.signInWithOAuth({
                       provider: "google",
-                      options: {
-                        redirectTo:
-                          process.env.NODE_ENV === "production"
-                            ? "https://visita-facil.netlify.app"
-                            : "http://localhost:3000",
-                      },
                     })
                   }
                   variant="outline"
