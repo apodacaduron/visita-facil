@@ -41,35 +41,35 @@ export default function MembersTable(props: Props) {
   const params = useParams();
 
   const columns = [
-  columnHelper.accessor(row => row.users?.name ?? 'Unknown', {
-    id: 'name',
-    header: 'Name',
-    cell: info => info.getValue(),
-  }),
-  columnHelper.accessor(row => row.users?.email ?? '-', {
-    id: 'email',
-    header: 'Email',
-    cell: info => info.getValue(),
-  }),
-  columnHelper.accessor(row => row.roles?.name ?? '-', {
-    id: 'role',
-    header: 'Role',
-    cell: info => info.getValue(),
-  }),
-  columnHelper.accessor('created_at', {
-    header: 'Joined',
-    cell: info => {
-      const createdAt = info.getValue();
-      if (!createdAt) return '-';
-      return new Date(createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    },
-  }),
+    columnHelper.accessor(row => row.users?.name ?? 'Desconocido', {
+      id: 'name',
+      header: 'Nombre',
+      cell: info => info.getValue(),
+    }),
+    columnHelper.accessor(row => row.users?.email ?? '-', {
+      id: 'email',
+      header: 'Correo',
+      cell: info => info.getValue(),
+    }),
+    columnHelper.accessor(row => row.roles?.name ?? '-', {
+      id: 'role',
+      header: 'Rol',
+      cell: info => info.getValue(),
+    }),
+    columnHelper.accessor('created_at', {
+      header: 'Fecha de ingreso',
+      cell: info => {
+        const createdAt = info.getValue();
+        if (!createdAt) return '-';
+        return new Date(createdAt).toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+      },
+    }),
     columnHelper.display({
-      header: 'Actions',
+      header: 'Acciones',
       cell: ({ row }) => {
         const member = row.original;
 
@@ -82,19 +82,19 @@ export default function MembersTable(props: Props) {
                 size="icon"
               >
                 <IconDotsVertical />
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">Abrir menú</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-32">
               <DropdownMenuItem onClick={() => props.onEdit(member)}>
-                Edit
+                Editar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
                 onClick={() => props.onDelete(member)}
               >
-                Delete
+                Eliminar
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -108,7 +108,7 @@ export default function MembersTable(props: Props) {
     queryFn: async ({ queryKey }) => {
       const [, parameters] = queryKey as [string, { searchInput: string }];
       const organizationId = params.organizationId?.toString();
-      if (!organizationId) throw new Error('Organization id not provided.');
+      if (!organizationId) throw new Error('ID de organización no proporcionado.');
 
       let query = supabase
         .from('organization_memberships')
@@ -168,7 +168,7 @@ export default function MembersTable(props: Props) {
                 colSpan={columns.length}
                 className="text-center text-sm text-destructive"
               >
-                Failed to load members.
+                Error al cargar los miembros.
               </TableCell>
             </TableRow>
           ) : data && data.length === 0 ? (
@@ -177,7 +177,7 @@ export default function MembersTable(props: Props) {
                 colSpan={columns.length}
                 className="text-center text-muted-foreground"
               >
-                No members found.
+                No se encontraron miembros.
               </TableCell>
             </TableRow>
           ) : (

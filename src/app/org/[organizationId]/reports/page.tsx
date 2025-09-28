@@ -17,14 +17,14 @@ import { supabase } from '@/lib/supabase';
 
 export default function Page() {
   const allFields = [
-    { key: "name", label: "Name" },
-    { key: "email", label: "Email" },
-    { key: "city", label: "City" },
-    { key: "state", label: "State" },
-    { key: "country", label: "Country" },
-    { key: "visit_date", label: "Visit Date" },
-    { key: "people_count", label: "People Count" },
-    { key: "created_at", label: "Created At" },
+    { key: "name", label: "Nombre" },
+    { key: "email", label: "Correo" },
+    { key: "city", label: "Ciudad" },
+    { key: "state", label: "Estado" },
+    { key: "country", label: "País" },
+    { key: "visit_date", label: "Fecha de visita" },
+    { key: "people_count", label: "Número de personas" },
+    { key: "created_at", label: "Fecha de registro" },
   ];
 
   const params = useParams();
@@ -38,19 +38,18 @@ export default function Page() {
 
   async function handleExport() {
     if (selectedFields.length === 0) {
-      alert("Select at least one field to export");
+      alert("Selecciona al menos un campo para exportar");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Get the session token of the current logged-in user
       const {
         data: { session },
         error: sessionError,
       } = await supabase.auth.getSession();
-      if (sessionError || !session) throw new Error("User not authenticated");
+      if (sessionError || !session) throw new Error("Usuario no autenticado");
 
       const token = session.access_token;
 
@@ -59,7 +58,7 @@ export default function Page() {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`, // <-- use user token, not anon key
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -72,7 +71,7 @@ export default function Page() {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to generate report");
+      if (!res.ok) throw new Error("No se pudo generar el reporte");
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -88,13 +87,13 @@ export default function Page() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `Visitors_${timestamp}.${ext}`;
+      a.download = `Visitantes_${timestamp}.${ext}`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
       if (err !== null && typeof err === 'object' && 'message' in err)
-        alert(err.message || "Error exporting data");
+        alert(err.message || "Error al exportar los datos");
     } finally {
       setLoading(false);
     }
@@ -125,44 +124,44 @@ export default function Page() {
                 <div>
                   <div className="font-medium text-xl">Reportes</div>
                   <div className="text-muted-foreground text-sm">
-                    Download visitor registration data in your preferred format
+                    Descarga los registros de visitantes en el formato que prefieras
                   </div>
                 </div>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Left Column */}
+                {/* Columna izquierda */}
                 <div className="space-y-6">
-                  {/* Date Range */}
+                  {/* Rango de fechas */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Date Range</CardTitle>
+                      <CardTitle>Rango de fechas</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <Input
-                          placeholder="dd/mm/yyyy"
+                          placeholder="dd/mm/aaaa"
                           type="date"
                           value={startDate}
                           onChange={(e) => setStartDate(e.target.value)}
                         />
                         <Input
-                          placeholder="dd/mm/yyyy"
+                          placeholder="dd/mm/aaaa"
                           type="date"
                           value={endDate}
                           onChange={(e) => setEndDate(e.target.value)}
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Leave empty to export all data
+                        Déjalo vacío para exportar todos los datos (Limitado a 100,000 registros)
                       </p>
                     </CardContent>
                   </Card>
 
-                  {/* Fields to Include */}
+                  {/* Campos a incluir */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Fields to Include</CardTitle>
+                      <CardTitle>Campos a incluir</CardTitle>
                     </CardHeader>
                     <CardContent className="grid grid-cols-2 gap-3">
                       {allFields.map((f) => (
@@ -181,12 +180,12 @@ export default function Page() {
                   </Card>
                 </div>
 
-                {/* Right Column */}
+                {/* Columna derecha */}
                 <div className="space-y-6">
-                  {/* Export Format */}
+                  {/* Formato de exportación */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Export Format</CardTitle>
+                      <CardTitle>Formato de exportación</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <Select
@@ -194,7 +193,7 @@ export default function Page() {
                         onValueChange={(v) => setFormat(v as "csv" | "xlsx")}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select format" />
+                          <SelectValue placeholder="Selecciona un formato" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="csv">CSV</SelectItem>
@@ -206,7 +205,7 @@ export default function Page() {
                         onClick={handleExport}
                         disabled={loading}
                       >
-                        {loading ? "Generating..." : "Export Data"}
+                        {loading ? "Generando..." : "Exportar datos"}
                       </Button>
                     </CardContent>
                   </Card>

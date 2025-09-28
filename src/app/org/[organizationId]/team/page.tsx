@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import {
     DeleteMemberDialog, InviteMemberDialog, MembersTable
-} from '@/features/organizations/components'; // make sure these exist
+} from '@/features/organizations/components'; // asegúrate que existan
 import { Member } from '@/features/organizations/components/MembersTable';
 
 export default function TeamPage() {
@@ -21,7 +21,6 @@ export default function TeamPage() {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<Member | null>(null);
 
-  // Query key for react-query
   const queryKeyGetter = useCallback(() => {
     const organizationId = params.organizationId?.toString();
     return searchInput
@@ -58,28 +57,29 @@ export default function TeamPage() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader breadcrumbs={[{ label: "Team" }]} />
+        {/* Encabezado */}
+        <SiteHeader breadcrumbs={[{ label: "Equipo" }]} />
         <div className="flex flex-1 flex-col p-6 gap-4">
-          {/* Page Title */}
+          {/* Título de la página */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-medium text-xl">Team Members</div>
+              <div className="font-medium text-xl">Miembros del equipo</div>
               <div className="text-muted-foreground text-sm">
-                Manage and view all organization members
+                Administra y visualiza a todos los miembros de la organización
               </div>
             </div>
             <Button disabled>
               <FileOutput className="size-4" />
-              Export selected
+              Exportar seleccionados
             </Button>
           </div>
 
-          {/* Search + Invite */}
+          {/* Buscar + Invitar */}
           <div className="flex justify-between items-center gap-2">
             <Input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search members..."
+              placeholder="Buscar miembros..."
               className="max-w-64"
               type="search"
             />
@@ -97,11 +97,11 @@ export default function TeamPage() {
             />
             <Button onClick={() => setInviteDialogOpen(true)}>
               <PlusIcon className="size-4" />
-              Invite Member
+              Invitar miembro
             </Button>
           </div>
 
-          {/* Delete dialog */}
+          {/* Dialogo Eliminar */}
           <DeleteMemberDialog
             itemId={currentItem?.id}
             itemName={currentItem?.users?.email ?? currentItem?.id}
@@ -116,7 +116,7 @@ export default function TeamPage() {
             }}
           />
 
-          {/* Members table */}
+          {/* Tabla de miembros */}
           <MembersTable
             onEdit={openEditDialog}
             onDelete={openDeleteDialog}

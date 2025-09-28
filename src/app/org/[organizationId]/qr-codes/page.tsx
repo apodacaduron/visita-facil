@@ -27,17 +27,19 @@ export default function Page() {
 
   const qrCards = [
     {
-      title: "Registration Entry",
-      description: "Place at entrance for visitor registration",
+      title: "Registro de Entrada",
+      description:
+        "Coloca este código en la entrada para que los visitantes se registren",
       url: `${baseUrl}/register`,
-      badge: "registration",
+      badge: "entrada",
       badgeColor: "bg-blue-100 text-blue-700",
     },
     {
-      title: "Exit Survey",
-      description: "Place at exit for feedback collection",
+      title: "Encuesta de Salida",
+      description:
+        "Coloca este código en la salida para recopilar comentarios",
       url: `${baseUrl}/exit`,
-      badge: "exit",
+      badge: "salida",
       badgeColor: "bg-gray-100 text-gray-700",
     },
   ];
@@ -50,7 +52,7 @@ export default function Page() {
       a.download = `${name.replace(/\s+/g, "_")}_QR.png`;
       a.click();
     } catch (err) {
-      console.error("Failed to generate QR code:", err);
+      console.error("No se pudo generar el código QR:", err);
     }
   };
 
@@ -59,7 +61,7 @@ export default function Page() {
       const dataUrl = await QRCode.toDataURL(url, { width: 500, margin: 2 });
       setPreviewUrl(dataUrl);
     } catch (err) {
-      console.error("Failed to generate QR code preview:", err);
+      console.error("No se pudo mostrar la vista previa del QR:", err);
     }
   };
 
@@ -72,34 +74,43 @@ export default function Page() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader breadcrumbs={[{ label: "QR Codes" }]} />
+        <SiteHeader breadcrumbs={[{ label: "Códigos QR" }]} />
 
         <div className="flex flex-1 flex-col gap-6 p-6">
           <div>
-            <h1 className="text-2xl font-semibold">QR Codes</h1>
+            <h1 className="text-2xl font-semibold">Códigos QR</h1>
             <p className="text-sm text-muted-foreground">
-              Manage QR codes for visitor registration and feedback
+              Administra los códigos QR para el registro de visitantes y encuestas de salida
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             {qrCards.map((card) => (
-              <Card key={card.title} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={card.title}
+                className="hover:shadow-lg transition-shadow"
+              >
                 <CardHeader className="flex items-center gap-4 p-4 border-b">
                   <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted">
                     <QrCode className="w-6 h-6" />
                   </div>
                   <div className="flex flex-col">
                     <CardTitle className="text-lg">{card.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{card.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {card.description}
+                    </p>
                   </div>
-                  <span className={`ml-auto rounded-full px-2 py-0.5 text-xs font-medium ${card.badgeColor}`}>
+                  <span
+                    className={`ml-auto rounded-full px-2 py-0.5 text-xs font-medium ${card.badgeColor}`}
+                  >
                     {card.badge}
                   </span>
                 </CardHeader>
 
                 <CardContent className="flex flex-col gap-2 p-4">
-                  <p className="text-xs text-muted-foreground truncate">{card.url}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {card.url}
+                  </p>
                   <div className="flex gap-2 mt-2 flex-wrap">
                     <Button
                       size="sm"
@@ -107,7 +118,7 @@ export default function Page() {
                       className="flex items-center gap-1"
                       onClick={() => navigator.clipboard.writeText(card.url)}
                     >
-                      <Copy className="h-4 w-4" /> Copy URL
+                      <Copy className="h-4 w-4" /> Copiar URL
                     </Button>
 
                     <Button
@@ -116,7 +127,7 @@ export default function Page() {
                       className="flex items-center gap-1"
                       onClick={() => window.open(card.url, "_blank")}
                     >
-                      <ExternalLink className="h-4 w-4" /> Open
+                      <ExternalLink className="h-4 w-4" /> Abrir
                     </Button>
 
                     <Button
@@ -125,7 +136,7 @@ export default function Page() {
                       className="flex items-center gap-1"
                       onClick={() => downloadQRCode(card.url, card.title)}
                     >
-                      <Download className="h-4 w-4" /> Download QR
+                      <Download className="h-4 w-4" /> Descargar QR
                     </Button>
 
                     <Dialog>
@@ -136,15 +147,19 @@ export default function Page() {
                           className="flex items-center gap-1"
                           onClick={() => previewQRCode(card.url)}
                         >
-                          <Eye className="h-4 w-4" /> Preview
+                          <Eye className="h-4 w-4" /> Vista previa
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="max-w-sm">
                         <DialogHeader>
-                          <DialogTitle>{card.title} QR Preview</DialogTitle>
+                          <DialogTitle>Vista previa: {card.title}</DialogTitle>
                         </DialogHeader>
                         {previewUrl && (
-                          <img src={previewUrl} alt={`${card.title} QR`} className="w-full h-auto" />
+                          <img
+                            src={previewUrl}
+                            alt={`${card.title} QR`}
+                            className="w-full h-auto"
+                          />
                         )}
                       </DialogContent>
                     </Dialog>

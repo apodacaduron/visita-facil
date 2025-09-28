@@ -9,7 +9,7 @@ import { SiteHeader } from '@/components/site-header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { DeleteVisitorDialog, VisitorDialog, VisitorsTable } from '@/features/visitors'; // adjust path as needed
+import { DeleteVisitorDialog, VisitorDialog, VisitorsTable } from '@/features/visitors';
 import { Visitor } from '@/features/visitors/components/VisitorsTable';
 
 export default function Page() {
@@ -21,8 +21,9 @@ export default function Page() {
 
   const queryKeyGetter = useCallback(() => {
     const organizationId = params.organizationId?.toString();
-
-    return searchInput ? ["visitors", { searchInput, organizationId }] : ["visitors", { organizationId }];
+    return searchInput
+      ? ["visitors", { searchInput, organizationId }]
+      : ["visitors", { organizationId }];
   }, [searchInput]);
 
   function openEditDialog(visitor: Visitor) {
@@ -37,13 +38,11 @@ export default function Page() {
 
   function handleFormDialogChange(open: boolean) {
     setFormDialogOpen(open);
-
     if (!open) setCurrentItem(null);
   }
 
   function handleDeleteDialogChange(open: boolean) {
     setDeleteDialogOpen(open);
-
     if (!open) setCurrentItem(null);
   }
 
@@ -61,7 +60,7 @@ export default function Page() {
         <SiteHeader
           breadcrumbs={[
             {
-              label: "Visitors",
+              label: "Visitantes",
             },
           ]}
         />
@@ -69,22 +68,27 @@ export default function Page() {
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
               <div className="flex items-center justify-between">
-                <div><div className='font-medium text-xl'>Visitors</div><div className='text-muted-foreground text-sm'>Manage and view all visitor registrations</div></div>
+                <div>
+                  <div className="font-medium text-xl">Visitantes</div>
+                  <div className="text-muted-foreground text-sm">
+                    Administra y consulta todos los registros de visitantes
+                  </div>
+                </div>
                 <Button disabled>
                   <FileOutput className="size-4" />
-                  Export selected
+                  Exportar seleccionados
                 </Button>
               </div>
               <div className="flex justify-between">
                 <Input
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Search..."
+                  placeholder="Buscar..."
                   className="max-w-64"
                   type="search"
                 />
 
-                {/* Create and edit dialog */}
+                {/* Crear y editar */}
                 <VisitorDialog
                   onSuccess={() => {
                     setFormDialogOpen(false);
@@ -99,7 +103,7 @@ export default function Page() {
                 />
                 <Button onClick={() => setFormDialogOpen(true)}>
                   <PlusIcon className="size-4" />
-                  Create
+                  Crear
                 </Button>
               </div>
 
@@ -117,7 +121,7 @@ export default function Page() {
                 }}
               />
 
-              {/* Visitors table */}
+              {/* Tabla de visitantes */}
               <VisitorsTable
                 onEdit={openEditDialog}
                 onDelete={openDeleteDialog}
