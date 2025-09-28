@@ -1,9 +1,11 @@
 // app/login/callback/page.tsx
 "use client";
 
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/lib/supabase';
 
 export default function OAuthCallback() {
@@ -12,8 +14,8 @@ export default function OAuthCallback() {
   useEffect(() => {
     const handle = async () => {
       const { data } = await supabase.auth.getSession();
+
       if (data.session) {
-        // Determine org id
         const { data: orgData } = await supabase
           .from("organizations")
           .select("id")
@@ -34,5 +36,17 @@ export default function OAuthCallback() {
     handle();
   }, [router]);
 
-  return <div className="p-4 text-center">Logging in…</div>;
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-sm animate-fadeIn">
+        <CardHeader className="text-center">
+          <CardTitle>Logging in…</CardTitle>
+          <CardDescription>Please wait while we redirect you.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex justify-center py-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
