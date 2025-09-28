@@ -91,9 +91,10 @@ export default function Page() {
       a.download = `Visitors_${timestamp}.${ext}`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      alert(err.message || "Error exporting data");
+      if (err !== null && typeof err === 'object' && 'message' in err)
+        alert(err.message || "Error exporting data");
     } finally {
       setLoading(false);
     }
@@ -190,7 +191,7 @@ export default function Page() {
                     <CardContent className="space-y-4">
                       <Select
                         value={format}
-                        onValueChange={(v) => setFormat(v as any)}
+                        onValueChange={(v) => setFormat(v as "csv" | "xlsx")}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select format" />

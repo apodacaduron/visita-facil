@@ -27,7 +27,15 @@ type Props = {
   queryKeyGetter(): unknown[];
 };
 
-const columnHelper = createColumnHelper<Visitor>();
+const columnHelper = createColumnHelper<
+  Visitor & {
+    cities: {
+      name: string;
+      state_name: string | null;
+      country_name: string | null;
+    } | null;
+  }
+>();
 
 export default function VisitorsTable(props: Props) {
   const params = useParams();
@@ -50,9 +58,9 @@ export default function VisitorsTable(props: Props) {
     ),
     columnHelper.accessor(
       (row) => {
-        const city = row.cities.name ?? "-";
-        const state = row.cities.state_name ?? "-";
-        const country = row.cities.country_name ?? "-";
+        const city = row.cities?.name ?? "-";
+        const state = row.cities?.state_name ?? "-";
+        const country = row.cities?.country_name ?? "-";
         return `Ciudad: ${city}\nEstado: ${state}\nPaís: ${country}\n`;
       },
       {
