@@ -23,7 +23,7 @@ export function LoginForm() {
                     supabase.auth.signInWithOAuth({
                       provider: "google",
                       options: {
-                        redirectTo: `${location.origin}/login`, // Make sure this matches middleware routing
+                        redirectTo: `${location.origin}/login/callback`, // Make sure this matches middleware routing
                       },
                     })
                   }
