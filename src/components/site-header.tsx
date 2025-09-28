@@ -1,4 +1,7 @@
+"use client";
+
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import React from 'react';
 
 import { Separator } from '@/components/ui/separator';
@@ -12,6 +15,8 @@ type Props = {
 }
 
 export function SiteHeader(props: Props) {
+  const params = useParams()
+
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) sticky top-0 bg-background z-10 rounded-t-xl">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -21,7 +26,7 @@ export function SiteHeader(props: Props) {
           className="mx-2 data-[orientation=vertical]:h-4"
         />
         <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Link href="/manage/dashboard" className="flex items-center gap-1 font-medium text-muted-foreground hover:underline hover:text-foreground">
+          <Link href={`/org/${params.organizationId?.toString()}/dashboard`} className="flex items-center gap-1 font-medium text-muted-foreground hover:underline hover:text-foreground">
             Home
           </Link>
           {props.breadcrumbs.map((crumb, i) => (
