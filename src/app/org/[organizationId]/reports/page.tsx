@@ -20,6 +20,8 @@ export default function Page() {
     { key: "name", label: "Name" },
     { key: "email", label: "Email" },
     { key: "city", label: "City" },
+    { key: "state", label: "State" },
+    { key: "country", label: "Country" },
     { key: "visit_date", label: "Visit Date" },
     { key: "people_count", label: "People Count" },
     { key: "created_at", label: "Created At" },
