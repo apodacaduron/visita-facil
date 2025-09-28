@@ -116,7 +116,7 @@ export default function VisitorsTable(props: Props) {
             info.getValue();
           return (
             <div className="whitespace-pre-line">
-              <div>Rating: {exitRating}</div>
+              <div>Rating: {exitRating}/5</div>
               <div title={exitFeedbackFull}>Feedback: {exitFeedback}</div>
             </div>
           );
