@@ -37,7 +37,7 @@ export default function OAuthCallback() {
   }, [router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+    <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-sm animate-fadeIn">
         <CardHeader className="text-center">
           <CardTitle>Logging in…</CardTitle>
