@@ -15,6 +15,23 @@ import { Tables } from '../../../../database.types';
 
 export default function InvitationsPage() {
   const router = useRouter();
+  const organizationsQuery = useQuery({
+    queryKey: ["organizations"],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      const userId = session?.user?.id;
+
+      if (!userId)
+        throw new Error("User id not found, could not fetch organizations");
+
+      return supabase
+        .from("organizations")
+        .select("*")
+        .eq("created_by", userId)
+    },
+  });
+
   const invitationsQuery = useQuery({
     queryKey: ["invitations"],
     queryFn: async () => {
@@ -141,11 +158,11 @@ export default function InvitationsPage() {
             </CardContent>
           </Card>
         ))}
-        <Link href="/login">
+        {organizationsQuery.data?.data?.length ? <Link href="/login">
           <Button className="flex-1" variant='outline'>
             <ArrowLeft className="w-4 h-4 mr-2" /> Volver al inicio
           </Button>
-        </Link>
+        </Link> : null}
       </div>
     </div>
   );

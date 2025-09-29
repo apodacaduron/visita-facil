@@ -26,17 +26,17 @@ export function TeamSwitcher() {
   const params = useParams();
   const { isMobile } = useSidebar();
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
-  const [activeTeam, setActiveTeam] = React.useState<Tables<'organizations'> | null>(null);
+  const [activeTeam, setActiveTeam] = React.useState<Tables<'organizations'> | null | undefined>(null);
 
   const organizationsQuery = useQuery({
-    queryKey: ["organizations"],
+    queryKey: ["organization-memberships"],
     queryFn: async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session?.user.id) throw new Error("User id not provided");
       return supabase
-        .from("organizations")
-        .select()
-        .eq("created_by", data.session?.user.id)
+        .from("organization_memberships")
+        .select('*, organizations(*)')
+        .eq("user_id", data.session?.user.id)
         .throwOnError();
     },
   });
@@ -47,7 +47,7 @@ export function TeamSwitcher() {
       const orgs = organizationsQuery.data.data;
 
       // Try to resolve from current URL first
-      let team = orgs.find((org) => org.id === params.organizationId) ?? null;
+      let team = orgs.find((org) => org.organization_id === params.organizationId) ?? null;
 
       // If no team in URL, try localStorage
       if (!team) {
@@ -57,13 +57,14 @@ export function TeamSwitcher() {
         }
       }
 
-      setActiveTeam(team);
+      setActiveTeam(team?.organizations);
     } else {
       setActiveTeam(null);
     }
   }, [organizationsQuery.data, params.organizationId]);
 
-  function selectTeam(team: Tables<'organizations'>) {
+  function selectTeam(team: Tables<'organizations'> | null | undefined) {
+    if (!team) return
     // Swap out the org ID in the path
     const segments = pathname.split("/");
     segments[2] = team.id; // "/org/{id}/..."
@@ -133,10 +134,10 @@ export function TeamSwitcher() {
                 : organizationsQuery.data?.data?.map((team, index) => (
                     <DropdownMenuItem
                       key={team.id}
-                      onClick={() => selectTeam(team)}
+                      onClick={() => selectTeam(team.organizations)}
                       className="gap-2 p-2"
                     >
-                      {team.name}
+                      {team.organizations?.name}
                       <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                     </DropdownMenuItem>
                   ))}
