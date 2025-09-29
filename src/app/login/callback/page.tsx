@@ -12,17 +12,23 @@ export default function OAuthCallback() {
 
   useEffect(() => {
     const handle = async () => {
-      const { data } = await supabase.auth.getSession();
+      console.log("OAuth callback triggered");
 
-      if (!data.session) {
+      const { data, error } = await supabase.auth.getSession();
+      console.log("Session data:", data);
+      if (error) console.error("Error fetching session:", error);
+
+      if (!data?.session) {
+        console.log("No session found → redirect to /login");
         router.replace("/login");
         return;
       }
 
       const userId = data.session.user.id;
+      console.log("Logged in user ID:", userId);
 
-      // 1) Active orgs
-      const { data: activeMembership } = await supabase
+      // 1) Check active orgs
+      const { data: activeMembership, error: activeError } = await supabase
         .from("organization_memberships")
         .select("organization_id")
         .eq("user_id", userId)
@@ -30,13 +36,17 @@ export default function OAuthCallback() {
         .limit(1)
         .single();
 
+      console.log("Active membership:", activeMembership);
+      if (activeError) console.error("Error fetching active membership:", activeError);
+
       if (activeMembership?.organization_id) {
+        console.log("User has active org → redirect to dashboard");
         router.replace(`/org/${activeMembership.organization_id}/dashboard`);
         return;
       }
 
-      // 2) Invites
-      const { data: invites } = await supabase
+      // 2) Check invitations
+      const { data: invites, error: inviteError } = await supabase
         .from("organization_memberships")
         .select("id")
         .eq("user_id", userId)
@@ -44,12 +54,17 @@ export default function OAuthCallback() {
         .limit(1)
         .single();
 
+      console.log("Pending invites:", invites);
+      if (inviteError) console.error("Error fetching invites:", inviteError);
+
       if (invites?.id) {
+        console.log("User has invites → redirect to /org/invitations");
         router.replace("/org/invitations");
         return;
       }
 
       // 3) Default → create org
+      console.log("No orgs or invites → redirect to /org/create");
       router.replace("/org/create");
     };
 
