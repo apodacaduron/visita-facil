@@ -277,7 +277,7 @@ export type Database = {
           created_at: string | null
           email: string
           id: string
-          name: string
+          name: string | null
           status: string | null
           updated_at: string | null
         }
@@ -285,7 +285,7 @@ export type Database = {
           created_at?: string | null
           email: string
           id?: string
-          name: string
+          name?: string | null
           status?: string | null
           updated_at?: string | null
         }
@@ -293,91 +293,11 @@ export type Database = {
           created_at?: string | null
           email?: string
           id?: string
-          name?: string
+          name?: string | null
           status?: string | null
           updated_at?: string | null
         }
         Relationships: []
-      }
-      visitor_field_values: {
-        Row: {
-          created_at: string | null
-          field_id: string | null
-          id: string
-          updated_at: string | null
-          value: string | null
-          visitor_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          field_id?: string | null
-          id?: string
-          updated_at?: string | null
-          value?: string | null
-          visitor_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          field_id?: string | null
-          id?: string
-          updated_at?: string | null
-          value?: string | null
-          visitor_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "visitor_field_values_field_id_fkey"
-            columns: ["field_id"]
-            isOneToOne: false
-            referencedRelation: "visitor_fields"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "visitor_field_values_visitor_id_fkey"
-            columns: ["visitor_id"]
-            isOneToOne: false
-            referencedRelation: "visitors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      visitor_fields: {
-        Row: {
-          created_at: string | null
-          field_type: string
-          id: string
-          is_required: boolean | null
-          name: string
-          organization_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          field_type: string
-          id?: string
-          is_required?: boolean | null
-          name: string
-          organization_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          field_type?: string
-          id?: string
-          is_required?: boolean | null
-          name?: string
-          organization_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "visitor_fields_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       visitors: {
         Row: {
@@ -444,10 +364,32 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      people_this_month: {
+        Args: { org_id: string }
+        Returns: number
+      }
+      visitors_daily: {
+        Args: { days_back: number; org_id: string }
+        Returns: {
+          count: number
+          visit_date: string
+        }[]
+      }
+      visitors_this_month: {
+        Args: { org_id: string }
+        Returns: number
+      }
+      visitors_this_week: {
+        Args: { org_id: string }
+        Returns: number
+      }
+      visitors_today: {
+        Args: { org_id: string }
+        Returns: number
+      }
     }
     Enums: {
-      member_status: "active" | "invited" | "inactive"
+      member_status: "active" | "invited" | "inactive" | "declined"
       user_status: "active" | "inactive"
     }
     CompositeTypes: {
@@ -576,7 +518,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      member_status: ["active", "invited", "inactive"],
+      member_status: ["active", "invited", "inactive", "declined"],
       user_status: ["active", "inactive"],
     },
   },

@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger
@@ -54,7 +55,11 @@ export default function MembersTable(props: Props) {
     columnHelper.accessor(row => row.roles?.name ?? '-', {
       id: 'role',
       header: 'Rol',
-      cell: info => info.getValue(),
+      cell: info => <Badge>{info.getValue()}</Badge>,
+    }),
+    columnHelper.accessor('status', {
+      header: 'Estatus',
+      cell: info => <Badge>{info.getValue()}</Badge>,
     }),
     columnHelper.accessor('created_at', {
       header: 'Fecha de ingreso',

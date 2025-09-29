@@ -36,7 +36,7 @@ export default function InviteMemberDialog(props: Props) {
   const { data: roles, isLoading: rolesLoading } = useQuery({
     queryKey: ["roles"],
     queryFn: async () => {
-      const { data } = await supabase.from("roles").select("*").order("name");
+      const { data } = await supabase.from("roles").select("*").order("name").neq('name', 'owner');
       return data ?? [];
     },
   });
@@ -54,10 +54,22 @@ export default function InviteMemberDialog(props: Props) {
       const organization_id = params.organizationId?.toString();
       if (!organization_id) throw new Error("Organization id not provided");
 
+      const user = await supabase
+        .from("users")
+        .upsert({
+          email: data.email,
+        })
+        .select()
+        .single()
+        .throwOnError();
+
+      const userId = user.data?.id;
+      if (!userId) throw new Error("User id not found");
+
       return supabase
         .from("organization_memberships")
         .insert({
-          email: data.email,
+          user_id: userId,
           role_id: data.role_id,
           organization_id,
           status: "invited",
@@ -86,7 +98,10 @@ export default function InviteMemberDialog(props: Props) {
           <DialogTitle>Invite New Member</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-2">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 pt-2"
+          >
             <FormField
               control={form.control}
               name="email"
@@ -136,7 +151,9 @@ export default function InviteMemberDialog(props: Props) {
               className="w-full mt-4"
               disabled={form.formState.isSubmitting}
             >
-              {form.formState.isSubmitting && <Loader2Icon className="animate-spin" />}
+              {form.formState.isSubmitting && (
+                <Loader2Icon className="animate-spin" />
+              )}
               Invite
             </Button>
           </form>

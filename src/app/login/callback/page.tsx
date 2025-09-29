@@ -1,4 +1,3 @@
-// app/login/callback/page.tsx
 "use client";
 
 import { Loader2 } from 'lucide-react';
@@ -15,22 +14,43 @@ export default function OAuthCallback() {
     const handle = async () => {
       const { data } = await supabase.auth.getSession();
 
-      if (data.session) {
-        const { data: orgData } = await supabase
-          .from("organizations")
-          .select("id")
-          .eq("created_by", data.session.user.id)
-          .limit(1)
-          .single();
-
-        const dashboardPath = orgData?.id
-          ? `/org/${orgData.id}/dashboard`
-          : "/org/create";
-
-        router.replace(dashboardPath);
-      } else {
+      if (!data.session) {
         router.replace("/login");
+        return;
       }
+
+      const userId = data.session.user.id;
+
+      // 1) Active orgs
+      const { data: activeMembership } = await supabase
+        .from("organization_memberships")
+        .select("organization_id")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .limit(1)
+        .single();
+
+      if (activeMembership?.organization_id) {
+        router.replace(`/org/${activeMembership.organization_id}/dashboard`);
+        return;
+      }
+
+      // 2) Invites
+      const { data: invites } = await supabase
+        .from("organization_memberships")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("status", "invited")
+        .limit(1)
+        .single();
+
+      if (invites?.id) {
+        router.replace("/org/invitations");
+        return;
+      }
+
+      // 3) Default → create org
+      router.replace("/org/create");
     };
 
     handle();
