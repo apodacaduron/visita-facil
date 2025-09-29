@@ -75,6 +75,14 @@ export default function InvitationsPage() {
     },
   });
 
+  const orgsLoading = organizationsQuery.isLoading;
+  const invitesLoading = invitationsQuery.isLoading;
+
+  const hasOrgs = organizationsQuery.data?.data && organizationsQuery.data?.data?.length > 0;
+  const hasInvites = invitationsQuery.data?.data && invitationsQuery.data?.data?.length > 0;
+
+  const showBackButton = !orgsLoading && !invitesLoading && (hasOrgs || (!hasOrgs && !hasInvites));
+
   // Loading state
   if (invitationsQuery.isLoading) {
     return (
@@ -158,7 +166,7 @@ export default function InvitationsPage() {
             </CardContent>
           </Card>
         ))}
-        {organizationsQuery.data?.data?.length ? <Link href="/login">
+        {showBackButton ? <Link href="/login">
           <Button className="flex-1" variant='outline'>
             <ArrowLeft className="w-4 h-4 mr-2" /> Volver al inicio
           </Button>
