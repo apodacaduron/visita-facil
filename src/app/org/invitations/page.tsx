@@ -113,6 +113,11 @@ export default function InvitationsPage() {
           You’ll see invitations here when someone adds you to their
           organization.
         </p>
+        {showBackButton ? <Link href="/login" className='mt-4'>
+          <Button className="flex-1" variant='outline'>
+            <ArrowLeft className="w-4 h-4 mr-2" /> Volver al inicio
+          </Button>
+        </Link> : null}
       </div>
     );
   }
