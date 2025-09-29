@@ -78,8 +78,8 @@ export default function InvitationsPage() {
   const orgsLoading = organizationsQuery.isLoading;
   const invitesLoading = invitationsQuery.isLoading;
 
-  const hasOrgs = organizationsQuery.data?.data && organizationsQuery.data?.data?.length > 0;
-  const hasInvites = invitationsQuery.data?.data && invitationsQuery.data?.data?.length > 0;
+  const hasOrgs = !!(organizationsQuery.data?.data?.length);
+  const hasInvites = !!(invitationsQuery.data?.data?.length);
 
   const showBackButton = !orgsLoading && !invitesLoading && (hasOrgs || (!hasOrgs && !hasInvites));
 
