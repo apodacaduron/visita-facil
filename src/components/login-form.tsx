@@ -23,10 +23,7 @@ export function LoginForm() {
                     supabase.auth.signInWithOAuth({
                       provider: "google",
                       options: {
-                        redirectTo:
-                          process.env.NODE_ENV === "production"
-                            ? `${process.env.NEXT_PUBLIC_BASE_URL}/login/callback`
-                            : `${location.origin}/login/callback`,
+                        redirectTo: `${location.origin}/login/callback`, // Make sure this matches middleware routing
                       },
                     })
                   }
