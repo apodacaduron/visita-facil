@@ -54,14 +54,23 @@ export default function InviteMemberDialog(props: Props) {
       const organization_id = params.organizationId?.toString();
       if (!organization_id) throw new Error("Organization id not provided");
 
-      const user = await supabase
+      let user = await supabase
         .from("users")
-        .upsert({
-          email: data.email,
-        })
         .select()
+        .eq('email',  data.email)
         .single()
         .throwOnError();
+
+      if (!user.data) {
+        user = await supabase
+          .from("users")
+          .insert({
+            email: data.email,
+          })
+          .select()
+          .single()
+          .throwOnError();
+      }
 
       const userId = user.data?.id;
       if (!userId) throw new Error("User id not found");
