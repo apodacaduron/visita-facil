@@ -1,6 +1,8 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
+} from '@/components/ui/dialog';
 import { DialogProps } from '@radix-ui/react-dialog';
 
 import CreateOrganizationForm from './CreateOrganizationForm';
@@ -14,9 +16,11 @@ export default function CreateOrganizationDialog(props: Props) {
     <Dialog {...props.dialogProps}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            Create new organization
-          </DialogTitle>
+          <DialogTitle>Create new organization</DialogTitle>
+          <DialogDescription>
+            Una organización representa a tu museo o institución. Aquí podrás
+            llevar el control de tus visitantes y reportes.
+          </DialogDescription>
         </DialogHeader>
         <CreateOrganizationForm />
       </DialogContent>

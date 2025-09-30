@@ -10,10 +10,11 @@ export default function CreateOrganizationPage() {
       <div className="flex w-full max-w-sm flex-col gap-6">
         <div className={cn("flex flex-col gap-6")}>
           <Card>
-            <CardHeader className="text-center">
-              <CardTitle className="text-xl">Crea una organización</CardTitle>
+            <CardHeader className="text-center space-y-2">
+              <CardTitle className="text-xl">Registra tu institución</CardTitle>
               <CardDescription>
-                Elige un nombre para identificar tu organización
+                Una organización representa a tu museo o institución. Aquí
+                podrás llevar el control de tus visitantes y reportes.
               </CardDescription>
             </CardHeader>
             <CardContent>
